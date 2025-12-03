@@ -181,16 +181,14 @@ export default function SkillWheelDiagram({
     const ratings = allRatings[skill.id];
     if (!ratings) return null;
 
-    if (ratingType === 'player' && ratings.player && ratings.player.length > 0) {
-      return ratings.player.reduce((sum, r) => sum + r.value, 0) / ratings.player.length;
-    } else if (ratingType === 'coach' && ratings.coach && ratings.coach.length > 0) {
-      return ratings.coach.reduce((sum, r) => sum + r.value, 0) / ratings.coach.length;
+    if (ratingType === 'player' && ratings.player && ratings.player.value !== undefined) {
+      return ratings.player.value;
+    } else if (ratingType === 'coach' && ratings.coach && ratings.coach.value !== undefined) {
+      return ratings.coach.value;
     } else if (ratingType === 'team' && ratings.team && ratings.team.length > 0) {
       // Dla team oblicz średnią ze wszystkich ankiet zespołowych dla tej umiejętności
-      const allValues = ratings.team.flatMap(teamRating => 
-        teamRating.map(r => r.value)
-      );
-      return allValues.reduce((sum, val) => sum + val, 0) / allValues.length;
+      const sum = ratings.team.reduce((acc, rating) => acc + rating.value, 0);
+      return sum / ratings.team.length;
     }
 
     return null;
