@@ -8,12 +8,9 @@ const getDefaultSkillTree = () => ({
   id: 'root',
   title: 'Profil Zawodnika',
   skills: [
-    { id: 'tech', name: 'Technika', children: [] },
-    { id: 'tact', name: 'Taktyka', children: [] },
-    { id: 'motor', name: 'Motoryka', children: [] },
     { 
       id: 'mental', 
-      name: 'Mental',
+      name: 'MENTAL',
       skills: [
         { id: 'mental-1', name: 'Zaangażowanie i motywacja', children: [] },
         { id: 'mental-2', name: 'Koncentracja Uwagi', children: [] },
@@ -21,6 +18,118 @@ const getDefaultSkillTree = () => ({
         { id: 'mental-4', name: 'Radzenie sobie ze stresem', children: [] },
         { id: 'mental-5', name: 'Umiejętności psychospołeczne', children: [] },
         { id: 'mental-6', name: 'Świadomość', children: [] }
+      ]
+    },
+    { 
+      id: 'tact', 
+      name: 'Taktyczne',
+      skills: [
+        { id: 'tact-1', name: 'Atak', children: [] },
+        { id: 'tact-2', name: 'Transfer A>O', children: [] },
+        { id: 'tact-3', name: 'Obrona', children: [] },
+        { id: 'tact-4', name: 'Transfer O>A', children: [] }
+      ]
+    },
+    { 
+      id: 'tact-tech', 
+      name: 'Taktyczno/Techniczne',
+      skills: [
+        { 
+          id: 'tact-tech-atak', 
+          name: 'Atakowanie',
+          skills: [
+            { id: 'tact-tech-atak-1', name: 'Ochrona piłki', children: [] },
+            { id: 'tact-tech-atak-2', name: 'Prowadzenie piłki', children: [] },
+            { id: 'tact-tech-atak-3', name: 'Przyjęcie', children: [] },
+            { id: 'tact-tech-atak-4', name: 'Podanie', children: [] },
+            { id: 'tact-tech-atak-5', name: 'Drybling', children: [] },
+            { id: 'tact-tech-atak-6', name: 'Uderzenie do bramki', children: [] },
+            { id: 'tact-tech-atak-7', name: 'Wsparcie utrzymujące', children: [] },
+            { id: 'tact-tech-atak-8', name: 'Wsparcie zdobywające', children: [] },
+            { id: 'tact-tech-atak-9', name: 'Gra na trzeciego', children: [] },
+            { id: 'tact-tech-atak-10', name: 'Gubienie krycia', children: [] },
+            { id: 'tact-tech-atak-11', name: 'Tworzenie przestrzeni', children: [] }
+          ]
+        },
+        { 
+          id: 'tact-tech-obrona', 
+          name: 'Bronienie',
+          skills: [
+            { 
+              id: 'tact-tech-obrona-1', 
+              name: 'Odbiór piłki',
+              skills: [
+                { id: 'odbior-1', name: 'Wola Bronienia - Chęć odbioru piłki', children: [] },
+                { id: 'odbior-2', name: 'Szybkie skócenie odległości', children: [] },
+                { id: 'odbior-3', name: 'Zwolnienie tempa biegu', children: [] },
+                { id: 'odbior-4', name: 'Wyciągnięcie ramienia', children: [] },
+                { id: 'odbior-5', name: 'Ustawienie boczne - kierunkowanie', children: [] },
+                { id: 'odbior-6', name: 'Obniżenie środka ciężkości i szerokie ustawienie ramion', children: [] },
+                { id: 'odbior-7', name: 'Poruszanie się małymi krokami w bliskiej odległości od atakującego', children: [] },
+                { id: 'odbior-8', name: 'Wybór momentu do odbioru', children: [] },
+                { id: 'odbior-9', name: 'Wejście między przeciwnika a piłkę', children: [] },
+                { id: 'odbior-10', name: 'Defensywne skanowanie - określenie czy 1v1 czy 1v2', children: [] },
+                { id: 'odbior-11', name: 'Odcinanie lini podania', children: [] },
+                { id: 'odbior-12', name: 'Blokowanie uderzeń', children: [] }
+              ]
+            },
+            { 
+              id: 'tact-tech-obrona-2', 
+              name: 'Krycie indywidualne',
+              skills: [
+                { id: 'krycie-ind-1', name: '4xP - Obserwuje Przeciwników, Piłkę, Partnerów, Przestrzeń', children: [] },
+                { id: 'krycie-ind-2', name: 'Podjęcie decyzji, którego przeciwnika kryję', children: [] },
+                { id: 'krycie-ind-3', name: 'Otwarta pozycja podczas krycia', children: [] },
+                { id: 'krycie-ind-4', name: 'Ustawienie obok przeciwnika', children: [] },
+                { id: 'krycie-ind-5', name: 'Unikanie wejścia przeciwnika za swoje plecy', children: [] }
+              ]
+            },
+            { 
+              id: 'tact-tech-obrona-3', 
+              name: 'Asekuracja',
+              skills: [
+                { id: 'asekuracja-1', name: 'Obserwacja przeciwnika z piłką oraz partnera', children: [] },
+                { id: 'asekuracja-2', name: 'Kontrola przestrzeni za plecami', children: [] },
+                { id: 'asekuracja-3', name: 'Pozycja boczna podczas asekuracji', children: [] },
+                { id: 'asekuracja-4', name: 'Odpowiednia odległość i kąt od partnera', children: [] }
+              ]
+            },
+            { 
+              id: 'tact-tech-obrona-4', 
+              name: 'Krycie strefowe',
+              skills: [
+                { id: 'krycie-stref-1', name: 'Zorienowanie na krycie zawodnika w swojej strefie', children: [] },
+                { id: 'krycie-stref-2', name: 'Kompaktowość (przesuwanie)', children: [] },
+                { id: 'krycie-stref-3', name: 'Przekazywanie krycia', children: [] },
+                { id: 'krycie-stref-4', name: 'Gotowość do aktywnej presji', children: [] }
+              ]
+            },
+            { 
+              id: 'tact-tech-obrona-5', 
+              name: 'Ochrona przestrzeni',
+              skills: [
+                { id: 'ochrona-przest-1', name: 'Obserwacja przeciwnika z piłką oraz przestrzeni przed i za sobą', children: [] },
+                { id: 'ochrona-przest-2', name: 'Boczne ustawienie ciała', children: [] },
+                { id: 'ochrona-przest-3', name: 'Tworzenie głębi', children: [] },
+                { id: 'ochrona-przest-4', name: 'Skracanie pola gry', children: [] },
+                { id: 'ochrona-przest-5', name: 'Gra na spalonego', children: [] }
+              ]
+            },
+            { id: 'tact-tech-obrona-6', name: 'Podwojenie/potrojenie przeciwnika', children: [] }
+          ]
+        }
+      ]
+    },
+    { 
+      id: 'motor', 
+      name: 'Motoryczne',
+      skills: [
+        { id: 'motor-1', name: 'Siła', children: [] },
+        { id: 'motor-2', name: 'Szybkość', children: [] },
+        { id: 'motor-3', name: 'Gibkość', children: [] },
+        { id: 'motor-4', name: 'Koordynacja', children: [] },
+        { id: 'motor-5', name: 'Zwinność', children: [] },
+        { id: 'motor-6', name: 'Wytrzymałość', children: [] }
       ]
     }
   ]
