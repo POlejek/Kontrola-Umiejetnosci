@@ -116,20 +116,23 @@ export default function SkillWheelDiagram({
     if (!ratings) return null;
 
     let data;
-    if (ratingType === 'player') data = ratings.player;
-    else if (ratingType === 'coach') data = ratings.coach;
+    if (ratingType === 'player') {
+      data = ratings.player;
+      // Jeśli player to pojedynczy obiekt, zamień na wartość
+      return data && data.value ? data.value : null;
+    }
+    else if (ratingType === 'coach') {
+      data = ratings.coach;
+      return data && data.value ? data.value : null;
+    }
     else if (ratingType === 'team') {
-      if (ratings.team.length === 0) return null;
-      // Średnia z ankiet zespołu
-      const node = findNodeById(skillTree, nodeId);
-      return node.skills.map((skill, i) => {
-        const sum = ratings.team.reduce((acc, rating) => acc + rating[i].value, 0);
-        return { name: skill.name, value: sum / ratings.team.length };
-      });
+      if (!ratings.team || ratings.team.length === 0) return null;
+      // Średnia z wielu ankiet zespołowych dla tego konkretnego pytania
+      const sum = ratings.team.reduce((acc, rating) => acc + rating.value, 0);
+      return sum / ratings.team.length;
     }
 
-    if (!data || data.length === 0) return null;
-    return data;
+    return null;
   };
 
   // Znajdź węzeł po ID
@@ -334,34 +337,36 @@ export default function SkillWheelDiagram({
   };
 
   const submitSurvey = (callback) => {
-    // Nowa prosta logika: zapisz oceny bezpośrednio dla liści
-    // Grupuj po sekcji (parent ID)
-    const ratingsByParent = {};
-    
+    // Zapisz oceny bezpośrednio dla każdego liścia (pytania)
     tempRatings.forEach(rating => {
-      // Każde pytanie ma path - ostatni element to rodzic
-      if (rating.path && rating.path.length > 0) {
-        const parentInfo = rating.path[rating.path.length - 1];
-        const parentId = parentInfo.id;
-        
-        if (!ratingsByParent[parentId]) {
-          ratingsByParent[parentId] = {
-            parentId,
-            ratings: []
-          };
-        }
-        
-        ratingsByParent[parentId].ratings.push({
-          id: rating.id,
-          name: rating.name,
-          value: rating.value
-        });
+      // Zapisz ocenę bezpośrednio dla ID pytania (liścia)
+      const existingRatings = allRatings[rating.id] || { player: [], coach: [], team: [] };
+      
+      const newRating = {
+        id: rating.id,
+        name: rating.name,
+        value: rating.value,
+        timestamp: new Date().toISOString()
+      };
+      
+      // Nadpisz poprzednią ocenę tego typu (player/coach) lub dodaj nową ankietę zespołową
+      if (surveyType === 'team') {
+        setAllRatings(prev => ({
+          ...prev,
+          [rating.id]: {
+            ...existingRatings,
+            team: [...existingRatings.team, newRating]
+          }
+        }));
+      } else {
+        setAllRatings(prev => ({
+          ...prev,
+          [rating.id]: {
+            ...existingRatings,
+            [surveyType]: newRating
+          }
+        }));
       }
-    });
-    
-    // Zapisz oceny dla każdego rodzica
-    Object.values(ratingsByParent).forEach(({ parentId, ratings }) => {
-      saveRatingsForNode(parentId, surveyType, ratings);
     });
     
     // Wyczyść stan ankiety i wróć do widoku diagramu
