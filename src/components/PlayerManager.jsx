@@ -267,6 +267,74 @@ export default function PlayerManager() {
     setShowLevelSelector(true);
   };
 
+  // Eksport danych do pliku JSON
+  const exportData = () => {
+    const dataToExport = {
+      version: '1.0',
+      exportDate: new Date().toISOString(),
+      globalSkillTree: globalSkillTree,
+      players: players
+    };
+
+    const jsonString = JSON.stringify(dataToExport, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `kontrola-umiejetnosci-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    alert('Dane zostały wyeksportowane!');
+  };
+
+  // Import danych z pliku JSON
+  const importData = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const importedData = JSON.parse(e.target.result);
+        
+        // Walidacja podstawowa
+        if (!importedData.players || !importedData.globalSkillTree) {
+          alert('Nieprawidłowy format pliku!');
+          return;
+        }
+
+        // Pytanie o potwierdzenie
+        if (window.confirm(
+          `Czy na pewno chcesz zaimportować dane?\n\n` +
+          `Data eksportu: ${new Date(importedData.exportDate).toLocaleString('pl-PL')}\n` +
+          `Liczba zawodników: ${importedData.players.length}\n\n` +
+          `UWAGA: Aktualne dane zostaną nadpisane!`
+        )) {
+          // Import danych
+          setGlobalSkillTree(importedData.globalSkillTree);
+          setPlayers(importedData.players);
+          
+          // Zapisz do localStorage
+          localStorage.setItem('globalSkillTree', JSON.stringify(importedData.globalSkillTree));
+          localStorage.setItem('skillTrackerPlayers', JSON.stringify(importedData.players));
+          
+          alert('Dane zostały pomyślnie zaimportowane!');
+          setView('players');
+        }
+      } catch (error) {
+        alert('Błąd podczas importu: ' + error.message);
+      }
+    };
+    reader.readAsText(file);
+    
+    // Reset input aby można było załadować ten sam plik ponownie
+    event.target.value = '';
+  };
+
   // Zbiera wszystkie węzły z drzewa (dla selekcji poziomu)
   const collectAllNodes = (tree, path = []) => {
     const nodes = [];
@@ -332,6 +400,27 @@ export default function PlayerManager() {
               <FileText size={20} />
               Edytuj Strukturę Umiejętności (Trener)
             </button>
+          </div>
+
+          {/* Przyciski Export/Import */}
+          <div className="mb-6 grid grid-cols-2 gap-4">
+            <button
+              onClick={exportData}
+              className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-2 shadow-lg"
+            >
+              <Share2 size={20} />
+              Eksportuj Dane
+            </button>
+            <label className="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition flex items-center justify-center gap-2 shadow-lg cursor-pointer">
+              <Share2 size={20} className="transform rotate-180" />
+              Importuj Dane
+              <input
+                type="file"
+                accept=".json"
+                onChange={importData}
+                className="hidden"
+              />
+            </label>
           </div>
 
           <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
