@@ -1128,6 +1128,19 @@ export default function PlayerManager() {
     const getRatingValue = (skillId, type) => {
       const rating = ratings[skillId]?.[type];
       if (!rating) return null;
+      
+      // Dla team - to jest tablica ankiet zespołowych
+      if (type === 'team' && Array.isArray(rating)) {
+        if (rating.length === 0) return null;
+        // Pomiń nieocenione i oblicz średnią z ostatniej ankiety lub wszystkich
+        const validRatings = rating.filter(r => r.unrated !== true);
+        if (validRatings.length === 0) return null;
+        // Zwróć ostatnią ocenę (najnowszą)
+        const lastRating = validRatings[validRatings.length - 1];
+        return typeof lastRating.value === 'number' ? lastRating.value : parseFloat(lastRating.value);
+      }
+      
+      // Dla player i coach - pojedyncze obiekty
       // Sprawdź czy ocena nie jest oznaczona jako nieoceniona
       if (rating.unrated === true) return null;
       const value = rating.value !== undefined ? rating.value : rating;
