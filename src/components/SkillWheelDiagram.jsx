@@ -319,7 +319,8 @@ export default function SkillWheelDiagram({
     // Inicjalizuj odpowiedzi dla wszystkich pytań - sprawdź czy są nieocenione
     setTempRatings(allQuestions.map(q => {
       const existingRating = allRatings[q.id]?.[type];
-      const isUnrated = existingRating?.unrated === true;
+      // Nieoceniona = brak oceny LUB ma flagę unrated
+      const isUnrated = !existingRating || existingRating?.unrated === true;
       return {
         id: q.id,
         name: q.name, 

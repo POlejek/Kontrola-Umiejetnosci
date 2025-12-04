@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { UserPlus, Users as UsersIcon, Users, Trash2, Share2, ExternalLink, FileText } from 'lucide-react';
+import { UserPlus, Users as UsersIcon, Users, Trash2, Share2, ExternalLink, FileText, Download } from 'lucide-react';
 import SkillWheelDiagram from './SkillWheelDiagram';
 import SkillTreeEditor from './SkillTreeEditor';
 
@@ -1066,6 +1066,337 @@ export default function PlayerManager() {
     );
   }
 
+  // Funkcja: Generuj raport HTML zawodnika
+  const generatePlayerReport = () => {
+    if (!currentPlayer) return;
+
+    // Zbierz wszystkie umiejętności (liście)
+    const collectLeafSkills = (node, path = '', sectionName = '') => {
+      const skills = [];
+      const children = node.skills || node.children || [];
+      
+      if (children.length === 0 && node.id && node.id !== 'root') {
+        // To jest liść (pytanie)
+        skills.push({
+          id: node.id,
+          name: node.name,
+          path: path,
+          section: sectionName
+        });
+      } else {
+        // To jest węzeł pośredni - rekurencja
+        children.forEach(child => {
+          const newPath = path ? `${path} > ${child.name}` : child.name;
+          const newSection = !sectionName ? child.name : sectionName;
+          skills.push(...collectLeafSkills(child, newPath, newSection));
+        });
+      }
+      
+      return skills;
+    };
+
+    const allSkills = collectLeafSkills(currentPlayer.skillTree);
+    const ratings = currentPlayer.ratings || {};
+
+    // Oblicz statystyki
+    const getRatingValue = (skillId, type) => {
+      const rating = ratings[skillId]?.[type];
+      if (!rating) return null;
+      return rating.value !== undefined ? rating.value : rating;
+    };
+
+    const stats = {
+      player: { total: 0, count: 0, rated: 0 },
+      coach: { total: 0, count: 0, rated: 0 },
+      team: { total: 0, count: 0, rated: 0 }
+    };
+
+    allSkills.forEach(skill => {
+      ['player', 'coach', 'team'].forEach(type => {
+        const value = getRatingValue(skill.id, type);
+        if (value !== null) {
+          stats[type].total += value;
+          stats[type].count++;
+          stats[type].rated++;
+        }
+      });
+    });
+
+    // Oblicz średnie
+    const avgPlayer = stats.player.count > 0 ? (stats.player.total / stats.player.count).toFixed(2) : 'Brak';
+    const avgCoach = stats.coach.count > 0 ? (stats.coach.total / stats.coach.count).toFixed(2) : 'Brak';
+    const avgTeam = stats.team.count > 0 ? (stats.team.total / stats.team.count).toFixed(2) : 'Brak';
+
+    // Grupuj umiejętności po sekcjach
+    const skillsBySection = {};
+    allSkills.forEach(skill => {
+      if (!skillsBySection[skill.section]) {
+        skillsBySection[skill.section] = [];
+      }
+      skillsBySection[skill.section].push(skill);
+    });
+
+    // Generuj HTML raportu
+    const reportHTML = `
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Raport: ${currentPlayer.name}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 40px 20px;
+      color: #333;
+    }
+    .report-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px;
+      text-align: center;
+    }
+    .header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    .header p {
+      font-size: 1.1em;
+      opacity: 0.9;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 40px;
+      background: #f8f9fa;
+    }
+    .stat-card {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      text-align: center;
+      border-top: 4px solid;
+    }
+    .stat-card.player { border-color: #3b82f6; }
+    .stat-card.coach { border-color: #10b981; }
+    .stat-card.team { border-color: #f59e0b; }
+    .stat-card h3 {
+      font-size: 0.9em;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      opacity: 0.7;
+    }
+    .stat-card .value {
+      font-size: 3em;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    .stat-card.player .value { color: #3b82f6; }
+    .stat-card.coach .value { color: #10b981; }
+    .stat-card.team .value { color: #f59e0b; }
+    .stat-card .label {
+      font-size: 0.85em;
+      color: #666;
+    }
+    .content {
+      padding: 40px;
+    }
+    .section {
+      margin-bottom: 40px;
+      page-break-inside: avoid;
+    }
+    .section-title {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 15px 25px;
+      border-radius: 10px;
+      font-size: 1.3em;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+    }
+    .skills-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .skills-table thead {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .skills-table th {
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.85em;
+      letter-spacing: 0.5px;
+    }
+    .skills-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .skills-table tbody tr:hover {
+      background: #f8f9fa;
+    }
+    .skills-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+    .rating {
+      display: inline-block;
+      min-width: 35px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-weight: bold;
+      text-align: center;
+    }
+    .rating.unrated {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+    .rating.low {
+      background: #fef3c7;
+      color: #d97706;
+    }
+    .rating.medium {
+      background: #dbeafe;
+      color: #2563eb;
+    }
+    .rating.high {
+      background: #d1fae5;
+      color: #059669;
+    }
+    .footer {
+      background: #f8f9fa;
+      padding: 30px;
+      text-align: center;
+      border-top: 3px solid #667eea;
+    }
+    .footer p {
+      color: #666;
+      font-size: 0.9em;
+    }
+    @media print {
+      body { background: white; padding: 0; }
+      .report-container { box-shadow: none; }
+      .section { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="report-container">
+    <div class="header">
+      <h1>📊 Raport Zawodnika</h1>
+      <p>${currentPlayer.name}</p>
+      <p style="font-size: 0.9em; margin-top: 10px;">Wygenerowano: ${new Date().toLocaleDateString('pl-PL', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })}</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card player">
+        <h3>Ocena Zawodnika</h3>
+        <div class="value">${avgPlayer}</div>
+        <div class="label">${stats.player.rated} / ${allSkills.length} umiejętności</div>
+      </div>
+      <div class="stat-card coach">
+        <h3>Ocena Trenera</h3>
+        <div class="value">${avgCoach}</div>
+        <div class="label">${stats.coach.rated} / ${allSkills.length} umiejętności</div>
+      </div>
+      <div class="stat-card team">
+        <h3>Ocena Zespołowa</h3>
+        <div class="value">${avgTeam}</div>
+        <div class="label">${stats.team.rated} / ${allSkills.length} umiejętności</div>
+      </div>
+    </div>
+
+    <div class="content">
+      ${Object.entries(skillsBySection).map(([section, skills]) => `
+        <div class="section">
+          <div class="section-title">${section}</div>
+          <table class="skills-table">
+            <thead>
+              <tr>
+                <th style="width: 50%;">Umiejętność</th>
+                <th style="width: 16%; text-align: center;">Zawodnik</th>
+                <th style="width: 16%; text-align: center;">Trener</th>
+                <th style="width: 16%; text-align: center;">Zespół</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${skills.map(skill => {
+                const playerVal = getRatingValue(skill.id, 'player');
+                const coachVal = getRatingValue(skill.id, 'coach');
+                const teamVal = getRatingValue(skill.id, 'team');
+                
+                const getRatingClass = (val) => {
+                  if (val === null) return 'unrated';
+                  if (val <= 4) return 'low';
+                  if (val <= 7) return 'medium';
+                  return 'high';
+                };
+                
+                const formatRating = (val) => {
+                  if (val === null) return '<span class="rating unrated">—</span>';
+                  return `<span class="rating ${getRatingClass(val)}">${val}</span>`;
+                };
+                
+                return `
+                  <tr>
+                    <td><strong>${skill.name}</strong></td>
+                    <td style="text-align: center;">${formatRating(playerVal)}</td>
+                    <td style="text-align: center;">${formatRating(coachVal)}</td>
+                    <td style="text-align: center;">${formatRating(teamVal)}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="footer">
+      <p><strong>System Kontroli Umiejętności</strong> • Raport wygenerowany automatycznie</p>
+      <p style="margin-top: 10px;">Nieocenione umiejętności oznaczone są symbolem "—" na czerwonym tle</p>
+    </div>
+  </div>
+</body>
+</html>
+    `;
+
+    // Otwórz raport w nowym oknie
+    const reportWindow = window.open('', '_blank');
+    reportWindow.document.write(reportHTML);
+    reportWindow.document.close();
+    
+    // Opcjonalnie automatyczne drukowanie po załadowaniu
+    reportWindow.onload = () => {
+      // Użytkownik może ręcznie wydrukować używając Ctrl+P
+    };
+  };
+
   // Widok diagramu zawodnika
   if (view === 'diagram' && currentPlayer) {
     return (
@@ -1075,18 +1406,28 @@ export default function PlayerManager() {
             <h2 className="text-xl font-semibold text-gray-800">{currentPlayer.name}</h2>
             <p className="text-sm text-gray-500">Profil Zawodnika</p>
           </div>
-          <button
-            onClick={() => {
-              setView('players');
-              setCurrentPlayer(null);
-              // Wyczyść URL
-              window.history.pushState({}, '', window.location.pathname);
-            }}
-            className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition flex items-center gap-2"
-          >
-            <UsersIcon size={18} />
-            Wróć do Listy Zawodników
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={generatePlayerReport}
+              className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-5 py-2 rounded-lg hover:from-purple-700 hover:to-blue-700 transition flex items-center gap-2 shadow-lg"
+              title="Pobierz ładny raport z wszystkimi wynikami i diagramami"
+            >
+              <Download size={18} />
+              Pobierz Raport
+            </button>
+            <button
+              onClick={() => {
+                setView('players');
+                setCurrentPlayer(null);
+                // Wyczyść URL
+                window.history.pushState({}, '', window.location.pathname);
+              }}
+              className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition flex items-center gap-2"
+            >
+              <UsersIcon size={18} />
+              Wróć do Listy Zawodników
+            </button>
+          </div>
         </div>
         
         <SkillWheelDiagram

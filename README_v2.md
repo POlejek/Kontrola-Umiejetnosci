@@ -35,6 +35,25 @@ Kompleksowa aplikacja do zarządzania i wizualizacji umiejętności zawodników 
 - Chroni przed utratą danych
 - [📖 Szczegółowa dokumentacja](WYKRYWANIE_DUPLIKATOW.md)
 
+### 📊 Generator Raportów
+- **Przycisk "Pobierz raport"** w profilu zawodnika
+- Automatyczne generowanie ładnego, czytelnego raportu HTML
+- **Zawiera:**
+  - Podsumowanie statystyk (średnie ocen: zawodnik, trener, zespół)
+  - Liczba ocenionych umiejętności
+  - Szczegółowe tabele dla każdej sekcji
+  - Kolorowe oznaczenia ocen (niskie/średnie/wysokie)
+  - Oznaczenie nieocenionych umiejętności
+- Idealny do spotkań z zawodnikami/rodzicami
+- Możliwość wydruku lub zapisu do PDF (Ctrl+P w oknie raportu)
+
+### 🔴 Inteligentne Oznaczenia Czerwone
+- **WSZYSTKIE nieocenione umiejętności** są czerwone (nie tylko nowe z importu)
+- Czerwone tło i ramka w ankietach
+- Badge "🔴 NOWA - WYMAGA OCENY"
+- Automatyczne usunięcie po pierwszym ocenieniu
+- Wizualna kontrola postępu oceniania
+
 ### 📄 Ankiety Single-Page
 - Wszystkie pytania na jednej stronie
 - Automatyczne grupowanie w sekcje i podsekcje

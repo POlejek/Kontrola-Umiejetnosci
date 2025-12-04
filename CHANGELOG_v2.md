@@ -39,6 +39,35 @@
 - **Chroni przed utratą danych** podczas importu
 - [Pełna dokumentacja](WYKRYWANIE_DUPLIKATOW.md)
 
+### 2d. **📊 Generator Raportów Zawodnika** ✨ NOWE!
+- **Przycisk "Pobierz raport"** w profilu każdego zawodnika
+- Automatyczne generowanie profesjonalnego raportu HTML
+- **Zawartość raportu:**
+  - Nagłówek z nazwą zawodnika i datą wygenerowania
+  - Karty statystyk: średnie ocen (zawodnik/trener/zespół)
+  - Liczba ocenionych umiejętności vs łączna liczba
+  - Szczegółowe tabele dla każdej sekcji umiejętności
+  - Kolorowe oznaczenia ocen (czerwone=nieoceniona, żółte=niskie, niebieskie=średnie, zielone=wysokie)
+- **Piękny design:**
+  - Gradient background (fiolet-niebieski)
+  - Profesjonalne cienie i zaokrąglenia
+  - Responsywny layout
+  - Przyjazny dla druku
+- **Użycie:** Otwiera się w nowym oknie → możliwość wydruku (Ctrl+P) lub zapisu do PDF
+- **Idealny do:** Spotkań z zawodnikami, rodzicami, prezentacji postępów
+
+### 2e. **🔴 Inteligentne Czerwone Oznaczenia** ✨ ULEPSZONE!
+- **WSZYSTKIE nieocenione umiejętności** są teraz czerwone (nie tylko nowe z importu)
+- System sprawdza czy umiejętność ma ocenę dla danego typu (zawodnik/trener/zespół)
+- Brak oceny → automatyczne czerwone tło, ramka i badge
+- **W ankietach:**
+  - Czerwone tło pytania
+  - Czerwona ramka
+  - Badge "🔴 NOWA - WYMAGA OCENY"
+  - Czerwony suwak zamiast niebieskiego
+- **Automatyczne usunięcie:** Po zapisaniu ankiety czerwone znika
+- **Wizualna kontrola postępu** - łatwo zobaczyć co wymaga oceny
+
 ### 3. **Ankieta Single-Page**
 - Wszystkie pytania wyświetlane na jednej stronie
 - Automatyczne pogrupowanie w sekcje i podsekcje
