@@ -57,20 +57,34 @@ export default function SkillWheelDiagram({
     const startNodeParam = urlParams.get('startNode');
     
     if (surveyParam && ['player', 'coach', 'team'].includes(surveyParam)) {
-      // Jeśli jest startNode, ustaw navigationPath
+      // Jeśli jest startNode, znajdź ten węzeł w drzewie
+      let targetNode = skillTree;
+      
       if (startNodeParam) {
         const nodePath = startNodeParam.split('/').filter(p => p);
-        if (nodePath.length > 0) {
-          setNavigationPath(['root', ...nodePath]);
+        
+        // Nawiguj do węzła
+        for (let nodeId of nodePath) {
+          const childrenArray = targetNode.skills || targetNode.children || [];
+          const foundChild = childrenArray.find(child => child.id === nodeId);
+          if (foundChild) {
+            targetNode = foundChild;
+          } else {
+            console.warn(`Nie znaleziono węzła: ${nodeId}`);
+            break;
+          }
         }
+        
+        // Ustaw ścieżkę nawigacji dla UI
+        setNavigationPath(['root', ...nodePath]);
       }
       
-      // Odczekaj chwilę na załadowanie danych i nawigację
+      // Rozpocznij ankietę z docelowego węzła
       setTimeout(() => {
-        startSurvey(surveyParam);
-      }, 500);
+        startSurveyFromNode(surveyParam, targetNode);
+      }, 100);
     }
-  }, []);
+  }, [skillTree]);
 
   // Pobierz aktualny węzeł na podstawie ścieżki nawigacji
   const getCurrentNode = () => {
@@ -313,11 +327,10 @@ export default function SkillWheelDiagram({
     return questions;
   };
 
-  const startSurvey = (type) => {
-    const currentNode = getCurrentNode();
-    
+  // Funkcja pomocnicza do rozpoczynania ankiety z konkretnego węzła
+  const startSurveyFromNode = (type, node) => {
     // Zbierz wszystkie pytania (liście) z hierarchii
-    const allQuestions = collectAllQuestions(currentNode);
+    const allQuestions = collectAllQuestions(node);
     
     if (allQuestions.length === 0) {
       console.error('Nie można rozpocząć ankiety - brak pytań (liści) w hierarchii');
@@ -340,6 +353,11 @@ export default function SkillWheelDiagram({
       };
     }));
     setCurrentView('survey');
+  };
+
+  const startSurvey = (type) => {
+    const currentNode = getCurrentNode();
+    startSurveyFromNode(type, currentNode);
   };
 
   const updateTempRating = (questionId, value) => {
