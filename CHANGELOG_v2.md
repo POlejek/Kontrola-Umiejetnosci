@@ -17,6 +17,15 @@
 - Po zapisaniu ankiety czerwone oznaczenie znika
 - [Pełna dokumentacja](IMPORT_EXPORT_STRUKTURY.md) | [Szybki start](QUICK_START_IMPORT_EXPORT.md)
 
+### 2b. **👥 Import/Export Zawodników (bez struktury)** ✨ NOWE!
+- **Eksport zawodników** - tylko dane zawodników bez struktury
+- **Import zawodników** - automatyczne dopasowanie do aktualnej struktury
+- Rozdzielenie: struktura osobno, zawodnicy osobno
+- Elastyczne zarządzanie przy transferach między klubami
+- Import DODAJE zawodników (nie nadpisuje)
+- Nowe umiejętności w strukturze → czerwone przy imporcie (ocena 5)
+- [Pełna dokumentacja](IMPORT_EXPORT_ZAWODNIKOW.md) | [Szybki start](QUICK_START_ZAWODNICY.md)
+
 ### 3. **Ankieta Single-Page**
 - Wszystkie pytania wyświetlane na jednej stronie
 - Automatyczne pogrupowanie w sekcje i podsekcje

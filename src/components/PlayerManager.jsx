@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { UserPlus, Users as UsersIcon, Trash2, Share2, ExternalLink, FileText } from 'lucide-react';
+import { UserPlus, Users as UsersIcon, Users, Trash2, Share2, ExternalLink, FileText } from 'lucide-react';
 import SkillWheelDiagram from './SkillWheelDiagram';
 import SkillTreeEditor from './SkillTreeEditor';
 
@@ -299,10 +299,11 @@ export default function PlayerManager() {
     setShowLevelSelector(true);
   };
 
-  // Eksport danych do pliku JSON
+  // Eksport pełnych danych (struktura + zawodnicy)
   const exportData = () => {
     const dataToExport = {
       version: '1.0',
+      type: 'full-backup',
       exportDate: new Date().toISOString(),
       globalSkillTree: globalSkillTree,
       players: players
@@ -320,10 +321,45 @@ export default function PlayerManager() {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
     
-    alert('Dane zostały wyeksportowane!');
+    alert('Pełny backup został wyeksportowany!');
   };
 
-  // Import danych z pliku JSON
+  // Eksport TYLKO zawodników (bez struktury)
+  const exportPlayers = () => {
+    if (players.length === 0) {
+      alert('Brak zawodników do eksportu!');
+      return;
+    }
+
+    const dataToExport = {
+      version: '1.0',
+      type: 'players-only',
+      exportDate: new Date().toISOString(),
+      players: players.map(p => ({
+        id: p.id,
+        name: p.name,
+        createdAt: p.createdAt,
+        ratings: p.ratings || {}
+        // NIE eksportujemy skillTree - to będzie pobrane z aktualnej struktury przy imporcie
+      }))
+    };
+
+    const jsonString = JSON.stringify(dataToExport, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `zawodnicy-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    alert('Dane zawodników zostały wyeksportowane (bez struktury umiejętności)!');
+  };
+
+  // Import pełnych danych (struktura + zawodnicy)
   const importData = (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -335,16 +371,16 @@ export default function PlayerManager() {
         
         // Walidacja podstawowa
         if (!importedData.players || !importedData.globalSkillTree) {
-          alert('Nieprawidłowy format pliku!');
+          alert('Nieprawidłowy format pliku! To nie jest pełny backup.');
           return;
         }
 
         // Pytanie o potwierdzenie
         if (window.confirm(
-          `Czy na pewno chcesz zaimportować dane?\n\n` +
+          `Czy na pewno chcesz zaimportować pełny backup?\n\n` +
           `Data eksportu: ${new Date(importedData.exportDate).toLocaleString('pl-PL')}\n` +
           `Liczba zawodników: ${importedData.players.length}\n\n` +
-          `UWAGA: Aktualne dane zostaną nadpisane!`
+          `UWAGA: Aktualne dane (struktura + zawodnicy) zostaną nadpisane!`
         )) {
           // Import danych
           setGlobalSkillTree(importedData.globalSkillTree);
@@ -354,7 +390,7 @@ export default function PlayerManager() {
           localStorage.setItem('globalSkillTree', JSON.stringify(importedData.globalSkillTree));
           localStorage.setItem('skillTrackerPlayers', JSON.stringify(importedData.players));
           
-          alert('Dane zostały pomyślnie zaimportowane!');
+          alert('Pełny backup został zaimportowany!');
           setView('players');
         }
       } catch (error) {
@@ -363,7 +399,74 @@ export default function PlayerManager() {
     };
     reader.readAsText(file);
     
-    // Reset input aby można było załadować ten sam plik ponownie
+    event.target.value = '';
+  };
+
+  // Import TYLKO zawodników (dopasowanie do aktualnej struktury)
+  const importPlayers = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const importedData = JSON.parse(e.target.result);
+        
+        // Walidacja
+        if (importedData.type !== 'players-only' || !importedData.players) {
+          alert('Nieprawidłowy format pliku! To nie jest plik z danymi zawodników.');
+          return;
+        }
+
+        // Zbierz ID z aktualnej struktury
+        const currentSkillIds = collectAllSkillIds(globalSkillTree);
+
+        // Pytanie o potwierdzenie
+        if (window.confirm(
+          `Czy na pewno chcesz zaimportować zawodników?\n\n` +
+          `Data eksportu: ${new Date(importedData.exportDate).toLocaleString('pl-PL')}\n` +
+          `Liczba zawodników: ${importedData.players.length}\n\n` +
+          `Zawodnicy otrzymają AKTUALNĄ strukturę umiejętności.\n` +
+          `Oceny zostaną dopasowane - nowe umiejętności będą CZERWONE (ocena 5).`
+        )) {
+          // Przygotuj zawodników z aktualną strukturą
+          const importedPlayers = importedData.players.map(importedPlayer => {
+            // Zbierz stare ID z ocen zawodnika
+            const playerRatingIds = new Set(Object.keys(importedPlayer.ratings || {}));
+            
+            // Dopasuj oceny do aktualnej struktury
+            const adjustedRatings = markNewSkillsAsUnrated(
+              importedPlayer.ratings || {},
+              playerRatingIds,
+              currentSkillIds
+            );
+
+            return {
+              ...importedPlayer,
+              skillTree: JSON.parse(JSON.stringify(globalSkillTree)), // Aktualna struktura
+              ratings: adjustedRatings
+            };
+          });
+
+          // DODAJ do istniejących zawodników (nie nadpisuj)
+          const newPlayers = [...players, ...importedPlayers];
+          setPlayers(newPlayers);
+          localStorage.setItem('skillTrackerPlayers', JSON.stringify(newPlayers));
+          
+          alert(
+            `Zaimportowano ${importedPlayers.length} zawodników!\n\n` +
+            `Zawodnicy mają aktualną strukturę umiejętności.\n` +
+            `Nowe umiejętności (których nie było w ich ocenach) są oznaczone CZERWONYM (ocena 5).\n\n` +
+            `Wypełnij ankiety aby usunąć czerwone oznaczenie.`
+          );
+          setView('players');
+        }
+      } catch (error) {
+        alert('Błąd podczas importu zawodników: ' + error.message);
+      }
+    };
+    reader.readAsText(file);
+    
     event.target.value = '';
   };
 
@@ -434,25 +537,63 @@ export default function PlayerManager() {
             </button>
           </div>
 
-          {/* Przyciski Export/Import */}
-          <div className="mb-6 grid grid-cols-2 gap-4">
-            <button
-              onClick={exportData}
-              className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-2 shadow-lg"
-            >
-              <Share2 size={20} />
-              Eksportuj Dane
-            </button>
-            <label className="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition flex items-center justify-center gap-2 shadow-lg cursor-pointer">
-              <Share2 size={20} className="transform rotate-180" />
-              Importuj Dane
-              <input
-                type="file"
-                accept=".json"
-                onChange={importData}
-                className="hidden"
-              />
-            </label>
+          {/* Sekcja: Pełny Backup (Struktura + Zawodnicy) */}
+          <div className="mb-6 bg-white rounded-xl shadow-lg p-4">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+              💾 Pełny Backup (Struktura + Zawodnicy)
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                onClick={exportData}
+                className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-2 shadow-lg"
+                title="Eksportuj wszystko: strukturę i zawodników"
+              >
+                <Share2 size={20} />
+                Eksportuj Wszystko
+              </button>
+              <label className="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition flex items-center justify-center gap-2 shadow-lg cursor-pointer"
+                title="Importuj wszystko: strukturę i zawodników">
+                <Share2 size={20} className="transform rotate-180" />
+                Importuj Wszystko
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={importData}
+                  className="hidden"
+                />
+              </label>
+            </div>
+          </div>
+
+          {/* Sekcja: Tylko Zawodnicy */}
+          <div className="mb-6 bg-white rounded-xl shadow-lg p-4">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+              👥 Tylko Zawodnicy (bez struktury)
+            </h3>
+            <p className="text-sm text-gray-600 mb-3">
+              Eksportuj/Importuj tylko dane zawodników. Przy imporcie używana jest AKTUALNA struktura umiejętności.
+            </p>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                onClick={exportPlayers}
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2 shadow-lg"
+                title="Eksportuj tylko zawodników (bez struktury)"
+              >
+                <Users size={20} />
+                Eksportuj Zawodników
+              </button>
+              <label className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition flex items-center justify-center gap-2 shadow-lg cursor-pointer"
+                title="Importuj zawodników - dopasują się do aktualnej struktury">
+                <Users size={20} className="transform rotate-180" />
+                Importuj Zawodników
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={importPlayers}
+                  className="hidden"
+                />
+              </label>
+            </div>
           </div>
 
           <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">

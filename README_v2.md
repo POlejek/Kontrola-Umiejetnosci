@@ -17,6 +17,14 @@ Kompleksowa aplikacja do zarządzania i wizualizacji umiejętności zawodników 
 - Zachowanie wszystkich istniejących ocen przy imporcie
 - [📖 Szczegółowa dokumentacja](IMPORT_EXPORT_STRUKTURY.md) | [⚡ Szybki start](QUICK_START_IMPORT_EXPORT.md)
 
+### 👥 Import/Export Zawodników (bez struktury)
+- **Eksport zawodników** - tylko dane zawodników bez struktury umiejętności
+- **Import zawodników** - automatyczne dopasowanie do aktualnej struktury
+- Elastyczne zarządzanie: osobno struktura, osobno zawodnicy
+- Idealne do transferu zawodników między klubami/systemami
+- Nowe umiejętności w strukturze → automatycznie czerwone przy imporcie
+- [📖 Szczegółowa dokumentacja](IMPORT_EXPORT_ZAWODNIKOW.md) | [⚡ Szybki start](QUICK_START_ZAWODNICY.md)
+
 ### 📄 Ankiety Single-Page
 - Wszystkie pytania na jednej stronie
 - Automatyczne grupowanie w sekcje i podsekcje
@@ -92,7 +100,9 @@ src/
 - [SYSTEM_ZAWODNIKOW.md](./SYSTEM_ZAWODNIKOW.md) - Guide systemu zawodników
 - [PRZEWODNIK.md](./PRZEWODNIK.md) - Przewodnik hierarchii
 - [IMPORT_EXPORT_STRUKTURY.md](./IMPORT_EXPORT_STRUKTURY.md) - 📤 Import/Export struktury
-- [QUICK_START_IMPORT_EXPORT.md](./QUICK_START_IMPORT_EXPORT.md) - ⚡ Szybki start importu/exportu
+- [QUICK_START_IMPORT_EXPORT.md](./QUICK_START_IMPORT_EXPORT.md) - ⚡ Szybki start importu/exportu struktury
+- [IMPORT_EXPORT_ZAWODNIKOW.md](./IMPORT_EXPORT_ZAWODNIKOW.md) - 👥 Import/Export zawodników
+- [QUICK_START_ZAWODNICY.md](./QUICK_START_ZAWODNICY.md) - ⚡ Szybki start importu/exportu zawodników
 
 ## 🔄 Przepływ Pracy
 

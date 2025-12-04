@@ -1,0 +1,41 @@
+{
+  "version": "1.0",
+  "type": "players-only",
+  "exportDate": "2025-12-04T13:00:00.000Z",
+  "players": [
+    {
+      "id": "player-test-1",
+      "name": "Jan Kowalski",
+      "createdAt": "2025-11-01T10:00:00.000Z",
+      "ratings": {
+        "mental-1": {
+          "player": { "value": 7, "timestamp": "2025-11-15T12:00:00.000Z" },
+          "coach": { "value": 8, "timestamp": "2025-11-15T14:00:00.000Z" },
+          "team": []
+        },
+        "mental-2": {
+          "player": { "value": 6, "timestamp": "2025-11-15T12:00:00.000Z" },
+          "coach": { "value": 7, "timestamp": "2025-11-15T14:00:00.000Z" },
+          "team": []
+        }
+      }
+    },
+    {
+      "id": "player-test-2",
+      "name": "Anna Nowak",
+      "createdAt": "2025-11-10T14:30:00.000Z",
+      "ratings": {
+        "mental-1": {
+          "player": { "value": 9, "timestamp": "2025-11-20T10:00:00.000Z" },
+          "coach": { "value": 9, "timestamp": "2025-11-20T15:00:00.000Z" },
+          "team": []
+        },
+        "tact-1": {
+          "player": { "value": 8, "timestamp": "2025-11-20T10:00:00.000Z" },
+          "coach": { "value": 8, "timestamp": "2025-11-20T15:00:00.000Z" },
+          "team": []
+        }
+      }
+    }
+  ]
+}
