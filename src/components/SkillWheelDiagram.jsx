@@ -316,14 +316,19 @@ export default function SkillWheelDiagram({
     }
     
     setSurveyType(type);
-    // Inicjalizuj odpowiedzi dla wszystkich pytań
-    setTempRatings(allQuestions.map(q => ({ 
-      id: q.id,
-      name: q.name, 
-      value: 5,
-      path: q.path,
-      section: q.section
-    })));
+    // Inicjalizuj odpowiedzi dla wszystkich pytań - sprawdź czy są nieocenione
+    setTempRatings(allQuestions.map(q => {
+      const existingRating = allRatings[q.id]?.[type];
+      const isUnrated = existingRating?.unrated === true;
+      return {
+        id: q.id,
+        name: q.name, 
+        value: existingRating?.value || 5,
+        path: q.path,
+        section: q.section,
+        unrated: isUnrated
+      };
+    }));
     setCurrentView('survey');
   };
 
@@ -345,6 +350,7 @@ export default function SkillWheelDiagram({
         name: rating.name,
         value: rating.value,
         timestamp: new Date().toISOString()
+        // NIE dodajemy unrated - po zapisaniu ankiety umiejętność jest oceniona
       };
       
       // Nadpisz poprzednią ocenę tego typu (player/coach) lub dodaj nową ankietę zespołową
@@ -361,7 +367,7 @@ export default function SkillWheelDiagram({
           ...prev,
           [rating.id]: {
             ...existingRatings,
-            [surveyType]: newRating
+            [surveyType]: newRating // Nadpisuje poprzednią ocenę (usuwa unrated)
           }
         }));
       }
@@ -697,10 +703,19 @@ export default function SkillWheelDiagram({
                   
                   <div className="space-y-4">
                     {questions.map((rating, qIdx) => (
-                      <div key={rating.id} className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-blue-300 transition">
+                      <div key={rating.id} className={`p-4 rounded-lg border-2 transition ${
+                        rating.unrated 
+                          ? 'bg-red-50 border-red-400 hover:border-red-500' 
+                          : 'bg-gray-50 border-gray-200 hover:border-blue-300'
+                      }`}>
                         <label className="block font-medium text-gray-700 mb-3">
                           <span className="text-blue-600 mr-2">#{sectionIdx + 1}.{qIdx + 1}</span>
                           {rating.name}
+                          {rating.unrated && (
+                            <span className="ml-2 text-xs font-bold text-red-600 bg-red-100 px-2 py-1 rounded">
+                              🔴 NOWA - WYMAGA OCENY
+                            </span>
+                          )}
                         </label>
                         <div className="flex items-center gap-4">
                           <span className="text-xs text-gray-500 w-8">1</span>
@@ -710,10 +725,14 @@ export default function SkillWheelDiagram({
                             max="10"
                             value={rating.value}
                             onChange={(e) => updateTempRating(rating.id, Number(e.target.value))}
-                            className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                            className={`flex-1 h-2 rounded-lg appearance-none cursor-pointer ${
+                              rating.unrated ? 'bg-red-200 accent-red-600' : 'bg-gray-200 accent-blue-600'
+                            }`}
                           />
                           <span className="text-xs text-gray-500 w-8">10</span>
-                          <span className="text-2xl font-bold text-blue-600 w-12 text-center">
+                          <span className={`text-2xl font-bold w-12 text-center ${
+                            rating.unrated ? 'text-red-600' : 'text-blue-600'
+                          }`}>
                             {rating.value}
                           </span>
                         </div>

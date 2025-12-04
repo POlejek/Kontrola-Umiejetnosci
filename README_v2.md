@@ -10,11 +10,19 @@ Kompleksowa aplikacja do zarządzania i wizualizacji umiejętności zawodników 
 - Graficzny interfejs z intuicyjną edycją
 - Dowolnie głęboka hierarchia (nie tylko 4 poziomy)
 
+### 📤 Import/Export Struktury Umiejętności
+- **Eksport struktury** bez ocen - idealne do współdzielenia między trenerami
+- **Import struktury** - automatyczne dodanie nowych umiejętności
+- 🔴 **Czerwone oznaczenie** nowych umiejętności (ocena domyślna: 5)
+- Zachowanie wszystkich istniejących ocen przy imporcie
+- [📖 Szczegółowa dokumentacja](IMPORT_EXPORT_STRUKTURY.md) | [⚡ Szybki start](QUICK_START_IMPORT_EXPORT.md)
+
 ### 📄 Ankiety Single-Page
 - Wszystkie pytania na jednej stronie
 - Automatyczne grupowanie w sekcje i podsekcje
 - Hierarchiczna wizualizacja pytań
 - Licznik pytań i sekcji
+- Wizualne oznaczenie nieocenionych umiejętności (czerwone)
 
 ### 🎯 Wybór Poziomu Ankiety
 - Trener decyduje od którego poziomu wygenerować ankietę
@@ -83,6 +91,8 @@ src/
 - [CHANGELOG_v2.md](./CHANGELOG_v2.md) - Szczegółowy opis zmian w wersji 2.0
 - [SYSTEM_ZAWODNIKOW.md](./SYSTEM_ZAWODNIKOW.md) - Guide systemu zawodników
 - [PRZEWODNIK.md](./PRZEWODNIK.md) - Przewodnik hierarchii
+- [IMPORT_EXPORT_STRUKTURY.md](./IMPORT_EXPORT_STRUKTURY.md) - 📤 Import/Export struktury
+- [QUICK_START_IMPORT_EXPORT.md](./QUICK_START_IMPORT_EXPORT.md) - ⚡ Szybki start importu/exportu
 
 ## 🔄 Przepływ Pracy
 

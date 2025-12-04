@@ -207,19 +207,51 @@ export default function PlayerManager() {
     }
   };
 
+  // Funkcja pomocnicza: znajdź wszystkie ID w drzewie
+  const collectAllSkillIds = (node, ids = new Set()) => {
+    if (node.id) ids.add(node.id);
+    const children = node.skills || node.children || [];
+    children.forEach(child => collectAllSkillIds(child, ids));
+    return ids;
+  };
+
+  // Funkcja pomocnicza: oznacz nowe umiejętności jako nieocenione
+  const markNewSkillsAsUnrated = (playerRatings, oldSkillIds, newSkillIds) => {
+    const updatedRatings = { ...playerRatings };
+    
+    // Znajdź nowe ID (które są w newSkillIds ale nie w oldSkillIds)
+    newSkillIds.forEach(skillId => {
+      if (!oldSkillIds.has(skillId)) {
+        // To jest nowa umiejętność - ustaw domyślnie na 5 i oznacz jako nieocenioną
+        updatedRatings[skillId] = {
+          player: { value: 5, unrated: true },
+          coach: { value: 5, unrated: true },
+          team: []
+        };
+      }
+    });
+    
+    return updatedRatings;
+  };
+
   const saveGlobalSkillTree = (newSkillTree) => {
+    // Zbierz stare i nowe ID umiejętności
+    const oldSkillIds = collectAllSkillIds(globalSkillTree);
+    const newSkillIds = collectAllSkillIds(newSkillTree);
+    
     // Zapisz globalną strukturę
     setGlobalSkillTree(newSkillTree);
     localStorage.setItem('globalSkillTree', JSON.stringify(newSkillTree));
     
-    // Zaktualizuj strukturę dla wszystkich zawodników (zachowaj oceny)
+    // Zaktualizuj strukturę dla wszystkich zawodników i oznacz nowe jako nieocenione
     const updatedPlayers = players.map(player => ({
       ...player,
-      skillTree: JSON.parse(JSON.stringify(newSkillTree))
+      skillTree: JSON.parse(JSON.stringify(newSkillTree)),
+      ratings: markNewSkillsAsUnrated(player.ratings || {}, oldSkillIds, newSkillIds)
     }));
     setPlayers(updatedPlayers);
     
-    alert('Struktura umiejętności została zaktualizowana dla wszystkich zawodników!');
+    alert('Struktura umiejętności została zaktualizowana!\n\nNowe umiejętności będą podświetlone na CZERWONO (ocena 5) do czasu zapisania ankiety przez trenera.');
     setView('players');
   };
 

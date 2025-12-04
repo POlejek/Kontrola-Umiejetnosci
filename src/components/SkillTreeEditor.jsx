@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Trash2, ChevronDown, ChevronRight, Save } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, ChevronRight, Save, Download, Upload } from 'lucide-react';
 
 const SkillTreeEditor = ({ skillTree, onSave }) => {
   const [editedTree, setEditedTree] = useState(JSON.parse(JSON.stringify(skillTree)));
@@ -179,6 +179,64 @@ const SkillTreeEditor = ({ skillTree, onSave }) => {
     setEditedTree(JSON.parse(JSON.stringify(skillTree)));
   };
 
+  // Export struktury umiejętności
+  const exportSkillStructure = () => {
+    const structureToExport = {
+      version: '1.0',
+      type: 'skill-structure',
+      exportDate: new Date().toISOString(),
+      structure: editedTree
+    };
+
+    const jsonString = JSON.stringify(structureToExport, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `struktura-umiejetnosci-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    alert('Struktura umiejętności została wyeksportowana!');
+  };
+
+  // Import struktury umiejętności
+  const importSkillStructure = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const importedData = JSON.parse(e.target.result);
+        
+        // Walidacja
+        if (importedData.type !== 'skill-structure' || !importedData.structure) {
+          alert('Nieprawidłowy format pliku! To nie jest plik struktury umiejętności.');
+          return;
+        }
+
+        // Pytanie o potwierdzenie
+        if (window.confirm(
+          `Czy na pewno chcesz zaimportować strukturę umiejętności?\n\n` +
+          `Data eksportu: ${new Date(importedData.exportDate).toLocaleString('pl-PL')}\n\n` +
+          `UWAGA: Nowe umiejętności zostaną dodane do profili zawodników z oceną 5 (czerwone podświetlenie).`
+        )) {
+          setEditedTree(importedData.structure);
+          alert('Struktura została zaimportowana! Kliknij "Zapisz zmiany" aby zastosować.');
+        }
+      } catch (error) {
+        alert('Błąd podczas importu: ' + error.message);
+      }
+    };
+    reader.readAsText(file);
+    
+    event.target.value = '';
+  };
+
   return (
     <div className="bg-gray-50 rounded-lg p-6 mb-6">
       <div className="flex items-center justify-between mb-4">
@@ -191,6 +249,25 @@ const SkillTreeEditor = ({ skillTree, onSave }) => {
           </p>
         </div>
         <div className="flex gap-2">
+          <button
+            onClick={exportSkillStructure}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            title="Eksportuj strukturę (bez ocen)"
+          >
+            <Download className="w-4 h-4" />
+            Eksportuj Strukturę
+          </button>
+          <label className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 cursor-pointer"
+            title="Importuj strukturę (bez ocen)">
+            <Upload className="w-4 h-4" />
+            Importuj Strukturę
+            <input
+              type="file"
+              accept=".json"
+              onChange={importSkillStructure}
+              className="hidden"
+            />
+          </label>
           <button
             onClick={handleReset}
             className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
