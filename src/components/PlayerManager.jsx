@@ -1090,7 +1090,8 @@ export default function PlayerManager() {
         return {
           type: 'skill',
           id: node.id,
-          name: node.name
+          name: node.name,
+          level: level
         };
       }
       
@@ -1101,6 +1102,7 @@ export default function PlayerManager() {
         type: level === 0 ? 'root' : (level === 1 ? 'section' : 'subsection'),
         id: node.id,
         name: node.name,
+        level: level,
         children: processedChildren
       };
     };
@@ -1165,105 +1167,161 @@ export default function PlayerManager() {
       return count > 0 ? (total / count).toFixed(2) : null;
     };
 
-    // Funkcja: Generuj HTML dla sekcji lub podsekcji
-    const renderSection = (section, isSubsection = false) => {
-      const skills = collectAllSkills(section);
-      
-      // Oblicz średnie dla tej sekcji
-      const avgPlayer = calculateAverage(skills, 'player');
-      const avgCoach = calculateAverage(skills, 'coach');
-      const avgTeam = calculateAverage(skills, 'team');
-      
-      const formatAvg = (avg) => avg !== null ? avg : 'Brak';
-      
-      const titleClass = isSubsection ? 'subsection-title' : 'section-title';
-      
+    // Funkcja: Generuj SVG diagram radarowy dla głównych sekcji
+    const generateRadarSVG = () => {
+      const mainSections = hierarchy.children || [];
+      if (mainSections.length === 0) return '';
+
+      const cx = 400;
+      const cy = 400;
+      const maxRadius = 300;
+      const levels = 10;
+      const angleStep = (2 * Math.PI) / mainSections.length;
+
+      // Przygotuj dane dla każdej sekcji
+      const sectionData = mainSections.map(section => {
+        const skills = collectAllSkills(section);
+        return {
+          name: section.name,
+          player: calculateAverage(skills, 'player'),
+          coach: calculateAverage(skills, 'coach'),
+          team: calculateAverage(skills, 'team')
+        };
+      });
+
+      // Funkcja do generowania punktów ścieżki
+      const generatePath = (type) => {
+        const points = sectionData.map((data, i) => {
+          const angle = i * angleStep - Math.PI / 2;
+          const value = data[type] || 0;
+          const radius = (value / 10) * maxRadius;
+          const x = cx + Math.cos(angle) * radius;
+          const y = cy + Math.sin(angle) * radius;
+          return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+        }).join(' ') + ' Z';
+        return points;
+      };
+
+      const colors = {
+        player: '#3b82f6',
+        coach: '#10b981',
+        team: '#f59e0b'
+      };
+
       return `
-        <div class="section">
-          <div class="${titleClass}">${section.name}</div>
+        <svg width="800" height="800" viewBox="0 0 800 800" style="max-width: 100%; height: auto;">
+          <rect width="800" height="800" fill="#fafafa" />
           
-          <div class="section-stats">
-            <div class="section-stat-card player">
-              <div class="section-stat-label">Zawodnik</div>
-              <div class="section-stat-value">${formatAvg(avgPlayer)}</div>
-            </div>
-            <div class="section-stat-card coach">
-              <div class="section-stat-label">Trener</div>
-              <div class="section-stat-value">${formatAvg(avgCoach)}</div>
-            </div>
-            <div class="section-stat-card team">
-              <div class="section-stat-label">Zespół</div>
-              <div class="section-stat-value">${formatAvg(avgTeam)}</div>
-            </div>
-          </div>
-          
-          ${renderSkillsOrSubsections(section)}
-        </div>
+          <!-- Koncentryczne okręgi -->
+          ${[...Array(levels)].map((_, i) => {
+            const r = ((i + 1) / levels) * maxRadius;
+            return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#e5e7eb" stroke-width="1" />`;
+          }).join('')}
+
+          <!-- Linie radialne -->
+          ${sectionData.map((_, i) => {
+            const angle = i * angleStep - Math.PI / 2;
+            const x1 = cx + Math.cos(angle) * maxRadius;
+            const y1 = cy + Math.sin(angle) * maxRadius;
+            return `<line x1="${cx}" y1="${cy}" x2="${x1}" y2="${y1}" stroke="#d1d5db" stroke-width="1.5" />`;
+          }).join('')}
+
+          <!-- Dane - wypełnienia -->
+          ${['player', 'coach', 'team'].map(type => {
+            const hasData = sectionData.some(d => d[type] !== null);
+            if (!hasData) return '';
+            return `<path d="${generatePath(type)}" fill="${colors[type]}30" stroke="${colors[type]}" stroke-width="2.5" stroke-linejoin="round" />`;
+          }).join('')}
+
+          <!-- Dane - punkty -->
+          ${['player', 'coach', 'team'].map(type => {
+            return sectionData.map((data, i) => {
+              const value = data[type];
+              if (value === null) return '';
+              const angle = i * angleStep - Math.PI / 2;
+              const radius = (value / 10) * maxRadius;
+              const x = cx + Math.cos(angle) * radius;
+              const y = cy + Math.sin(angle) * radius;
+              return `<circle cx="${x}" cy="${y}" r="4" fill="${colors[type]}" stroke="white" stroke-width="2" />`;
+            }).join('');
+          }).join('')}
+
+          <!-- Etykiety sekcji -->
+          ${sectionData.map((section, i) => {
+            const angle = i * angleStep - Math.PI / 2;
+            const labelX = cx + Math.cos(angle) * (maxRadius + 50);
+            const labelY = cy + Math.sin(angle) * (maxRadius + 50);
+            return `<text x="${labelX}" y="${labelY}" text-anchor="middle" dominant-baseline="middle" fill="#374151" font-size="13" font-weight="600">${section.name}</text>`;
+          }).join('')}
+
+          <!-- Środkowy punkt -->
+          <circle cx="${cx}" cy="${cy}" r="5" fill="#374151" />
+        </svg>
       `;
     };
 
-    // Funkcja: Renderuj umiejętności lub podsekcje
-    const renderSkillsOrSubsections = (node) => {
-      if (!node.children || node.children.length === 0) return '';
-      
-      // Sprawdź czy dzieci to podsekcje czy bezpośrednio umiejętności
-      const hasSubsections = node.children.some(child => child.type === 'subsection');
-      
-      if (hasSubsections) {
-        // Renderuj podsekcje
-        return node.children.map(child => {
-          if (child.type === 'subsection') {
-            return renderSection(child, true);
-          }
-          return '';
-        }).join('');
-      } else {
-        // Renderuj tabelę z umiejętnościami - wszystkie dzieci które są umiejętnościami
-        const allLeaves = collectAllSkills(node);
+    // Funkcja: Generuj rekurencyjnie hierarchię z accordion
+    const renderHierarchyNode = (node, level = 0) => {
+      if (node.type === 'skill') {
+        // Pojedyncza umiejętność - wiersz tabeli
+        const playerVal = getRatingValue(node.id, 'player');
+        const coachVal = getRatingValue(node.id, 'coach');
+        const teamVal = getRatingValue(node.id, 'team');
         
-        if (allLeaves.length === 0) return '';
+        const getRatingClass = (val) => {
+          if (val === null) return 'unrated';
+          if (val <= 4) return 'low';
+          if (val <= 7) return 'medium';
+          return 'high';
+        };
         
+        const formatRating = (val) => {
+          if (val === null) return '<span class="rating unrated">—</span>';
+          return `<span class="rating ${getRatingClass(val)}">${val}</span>`;
+        };
+
         return `
-          <table class="skills-table">
-            <thead>
-              <tr>
-                <th style="width: 50%;">Umiejętność</th>
-                <th style="width: 16%; text-align: center;">Zawodnik</th>
-                <th style="width: 16%; text-align: center;">Trener</th>
-                <th style="width: 16%; text-align: center;">Zespół</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${allLeaves.map(skill => {
-                const playerVal = getRatingValue(skill.id, 'player');
-                const coachVal = getRatingValue(skill.id, 'coach');
-                const teamVal = getRatingValue(skill.id, 'team');
-                
-                const getRatingClass = (val) => {
-                  if (val === null) return 'unrated';
-                  if (val <= 4) return 'low';
-                  if (val <= 7) return 'medium';
-                  return 'high';
-                };
-                
-                const formatRating = (val) => {
-                  if (val === null) return '<span class="rating unrated">—</span>';
-                  return `<span class="rating ${getRatingClass(val)}">${val}</span>`;
-                };
-                
-                return `
-                  <tr>
-                    <td><strong>${skill.name}</strong></td>
-                    <td style="text-align: center;">${formatRating(playerVal)}</td>
-                    <td style="text-align: center;">${formatRating(coachVal)}</td>
-                    <td style="text-align: center;">${formatRating(teamVal)}</td>
-                  </tr>
-                `;
-              }).join('')}
-            </tbody>
-          </table>
+          <div class="skill-row level-${level}">
+            <div class="skill-name">${node.name}</div>
+            <div class="skill-ratings">
+              <div class="skill-rating">${formatRating(playerVal)}</div>
+              <div class="skill-rating">${formatRating(coachVal)}</div>
+              <div class="skill-rating">${formatRating(teamVal)}</div>
+            </div>
+          </div>
         `;
       }
+
+      // Sekcja lub podsekcja
+      if (!node.children || node.children.length === 0) return '';
+
+      const skills = collectAllSkills(node);
+      const avgPlayer = calculateAverage(skills, 'player');
+      const avgCoach = calculateAverage(skills, 'coach');
+      const avgTeam = calculateAverage(skills, 'team');
+      const formatAvg = (avg) => avg !== null ? avg : '—';
+
+      const nodeId = `node-${node.id || Math.random().toString(36).substr(2, 9)}`;
+      const levelClass = level === 1 ? 'section' : level === 2 ? 'subsection' : 'subsubsection';
+
+      return `
+        <div class="hierarchy-node ${levelClass} level-${level}">
+          <div class="node-header" onclick="toggleNode('${nodeId}')">
+            <div class="node-title-row">
+              <span class="toggle-icon" id="icon-${nodeId}">▶</span>
+              <span class="node-name">${node.name}</span>
+            </div>
+            <div class="node-averages">
+              <div class="node-avg player-avg" title="Zawodnik">${formatAvg(avgPlayer)}</div>
+              <div class="node-avg coach-avg" title="Trener">${formatAvg(avgCoach)}</div>
+              <div class="node-avg team-avg" title="Zespół">${formatAvg(avgTeam)}</div>
+            </div>
+          </div>
+          <div class="node-content" id="${nodeId}" style="display: none;">
+            ${node.children.map(child => renderHierarchyNode(child, level + 1)).join('')}
+          </div>
+        </div>
+      `;
     };
 
     // Generuj HTML raportu
@@ -1283,7 +1341,7 @@ export default function PlayerManager() {
       color: #333;
     }
     .report-container {
-      max-width: 1200px;
+      max-width: 1400px;
       margin: 0 auto;
       background: white;
       border-radius: 20px;
@@ -1307,7 +1365,7 @@ export default function PlayerManager() {
     }
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
       gap: 20px;
       padding: 40px;
       background: #f8f9fa;
@@ -1342,112 +1400,181 @@ export default function PlayerManager() {
       font-size: 0.85em;
       color: #666;
     }
+    
+    /* Diagram radarowy */
+    .radar-section {
+      padding: 40px;
+      background: white;
+      text-align: center;
+    }
+    .radar-section h2 {
+      font-size: 1.8em;
+      margin-bottom: 20px;
+      color: #667eea;
+    }
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+    }
+    
+    /* Hierarchia z accordion */
     .content {
       padding: 40px;
-    }
-    .section {
-      margin-bottom: 40px;
-      page-break-inside: avoid;
-    }
-    .section-title {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 15px 25px;
-      border-radius: 10px;
-      font-size: 1.3em;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
-    }
-    .subsection-title {
-      background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
-      color: white;
-      padding: 12px 20px;
-      border-radius: 8px;
-      font-size: 1.1em;
-      margin: 20px 0 15px 0;
-      box-shadow: 0 3px 8px rgba(139, 92, 246, 0.3);
-    }
-    .section-stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-      margin: 20px 0;
-    }
-    .section-stat-card {
-      background: white;
-      padding: 15px;
-      border-radius: 10px;
-      text-align: center;
-      border: 2px solid;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-    .section-stat-card.player {
-      border-color: #3b82f6;
-    }
-    .section-stat-card.coach {
-      border-color: #10b981;
-    }
-    .section-stat-card.team {
-      border-color: #f59e0b;
-    }
-    .section-stat-label {
-      font-size: 0.75em;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      opacity: 0.7;
-      margin-bottom: 8px;
-      font-weight: 600;
-    }
-    .section-stat-value {
-      font-size: 1.8em;
-      font-weight: bold;
-    }
-    .section-stat-card.player .section-stat-value {
-      color: #3b82f6;
-    }
-    .section-stat-card.coach .section-stat-value {
-      color: #10b981;
-    }
-    .section-stat-card.team .section-stat-value {
-      color: #f59e0b;
-    }
-    .skills-table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    .skills-table thead {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-    }
-    .skills-table th {
-      padding: 15px;
-      text-align: left;
-      font-weight: 600;
-      text-transform: uppercase;
-      font-size: 0.85em;
-      letter-spacing: 0.5px;
-    }
-    .skills-table td {
-      padding: 12px 15px;
-      border-bottom: 1px solid #e5e7eb;
-    }
-    .skills-table tbody tr:hover {
       background: #f8f9fa;
     }
-    .skills-table tbody tr:last-child td {
-      border-bottom: none;
+    .content h2 {
+      font-size: 1.8em;
+      margin-bottom: 30px;
+      color: #667eea;
+      text-align: center;
+    }
+    .hierarchy-node {
+      margin-bottom: 15px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      background: white;
+    }
+    .hierarchy-node.section {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .node-header {
+      padding: 18px 25px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .node-header:hover {
+      background: #f8f9fa;
+    }
+    .hierarchy-node.section .node-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .hierarchy-node.section .node-header:hover {
+      background: linear-gradient(135deg, #5568d3 0%, #653b8e 100%);
+    }
+    .hierarchy-node.subsection .node-header {
+      background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+      color: white;
+      padding: 15px 20px;
+    }
+    .hierarchy-node.subsection .node-header:hover {
+      background: linear-gradient(135deg, #7c4ee0 0%, #db2777 100%);
+    }
+    .hierarchy-node.subsubsection .node-header {
+      background: #e0e7ff;
+      color: #4338ca;
+      padding: 12px 18px;
+    }
+    .node-title-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      font-size: 1.15em;
+    }
+    .hierarchy-node.subsection .node-title-row {
+      font-size: 1.05em;
+    }
+    .hierarchy-node.subsubsection .node-title-row {
+      font-size: 0.95em;
+    }
+    .toggle-icon {
+      transition: transform 0.3s;
+      font-size: 0.9em;
+    }
+    .toggle-icon.open {
+      transform: rotate(90deg);
+    }
+    .node-averages {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+    .node-avg {
+      min-width: 45px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 1em;
+      text-align: center;
+      background: white;
+      color: #333;
+    }
+    .hierarchy-node.section .node-avg,
+    .hierarchy-node.subsection .node-avg {
+      background: rgba(255,255,255,0.95);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .node-avg.player-avg { border: 2px solid #3b82f6; color: #3b82f6; }
+    .node-avg.coach-avg { border: 2px solid #10b981; color: #10b981; }
+    .node-avg.team-avg { border: 2px solid #f59e0b; color: #f59e0b; }
+    .node-content {
+      padding: 20px;
+      background: #fafafa;
+    }
+    .hierarchy-node.section .node-content {
+      padding: 25px;
+    }
+    .hierarchy-node.subsection .node-content,
+    .hierarchy-node.subsubsection .node-content {
+      padding: 15px;
+      background: white;
+    }
+    
+    /* Wiersze umiejętności */
+    .skill-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 20px;
+      margin-bottom: 8px;
+      background: white;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    .skill-row:hover {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+    .skill-name {
+      font-weight: 500;
+      color: #374151;
+      flex: 1;
+    }
+    .skill-ratings {
+      display: flex;
+      gap: 12px;
+    }
+    .skill-rating {
+      min-width: 50px;
+      text-align: center;
     }
     .rating {
       display: inline-block;
-      min-width: 35px;
-      padding: 5px 10px;
-      border-radius: 6px;
+      min-width: 40px;
+      padding: 6px 12px;
+      border-radius: 8px;
       font-weight: bold;
       text-align: center;
+      font-size: 0.95em;
     }
     .rating.unrated {
       background: #fee2e2;
@@ -1465,6 +1592,7 @@ export default function PlayerManager() {
       background: #d1fae5;
       color: #059669;
     }
+    
     .footer {
       background: #f8f9fa;
       padding: 30px;
@@ -1475,12 +1603,45 @@ export default function PlayerManager() {
       color: #666;
       font-size: 0.9em;
     }
+    
     @media print {
       body { background: white; padding: 0; }
       .report-container { box-shadow: none; }
-      .section { page-break-inside: avoid; }
+      .node-header { cursor: default; }
+      .node-content { display: block !important; }
+      .toggle-icon { display: none; }
     }
   </style>
+  <script>
+    function toggleNode(nodeId) {
+      const content = document.getElementById(nodeId);
+      const icon = document.getElementById('icon-' + nodeId);
+      
+      if (content.style.display === 'none' || content.style.display === '') {
+        content.style.display = 'block';
+        icon.classList.add('open');
+      } else {
+        content.style.display = 'none';
+        icon.classList.remove('open');
+      }
+    }
+    
+    // Funkcja do rozwinięcia wszystkich sekcji
+    function expandAll() {
+      const allContents = document.querySelectorAll('.node-content');
+      const allIcons = document.querySelectorAll('.toggle-icon');
+      allContents.forEach(content => content.style.display = 'block');
+      allIcons.forEach(icon => icon.classList.add('open'));
+    }
+    
+    // Funkcja do zwinięcia wszystkich sekcji
+    function collapseAll() {
+      const allContents = document.querySelectorAll('.node-content');
+      const allIcons = document.querySelectorAll('.toggle-icon');
+      allContents.forEach(content => content.style.display = 'none');
+      allIcons.forEach(icon => icon.classList.remove('open'));
+    }
+  </script>
 </head>
 <body>
   <div class="report-container">
@@ -1514,10 +1675,40 @@ export default function PlayerManager() {
       </div>
     </div>
 
+    <div class="radar-section">
+      <h2>📈 Diagram Radarowy</h2>
+      <div style="display: flex; justify-content: center;">
+        ${generateRadarSVG()}
+      </div>
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-color" style="background: #3b82f6;"></div>
+          <span>Zawodnik</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background: #10b981;"></div>
+          <span>Trener</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background: #f59e0b;"></div>
+          <span>Zespół</span>
+        </div>
+      </div>
+    </div>
+
     <div class="content">
+      <h2>🎯 Szczegółowa Hierarchia Umiejętności</h2>
+      <div style="text-align: center; margin-bottom: 20px;">
+        <button onclick="expandAll()" style="padding: 10px 20px; margin: 0 5px; border: none; background: #10b981; color: white; border-radius: 8px; cursor: pointer; font-weight: 600;">
+          ▼ Rozwiń Wszystko
+        </button>
+        <button onclick="collapseAll()" style="padding: 10px 20px; margin: 0 5px; border: none; background: #6b7280; color: white; border-radius: 8px; cursor: pointer; font-weight: 600;">
+          ▲ Zwiń Wszystko
+        </button>
+      </div>
       ${hierarchy.children ? hierarchy.children.map(section => {
         if (section.type === 'section') {
-          return renderSection(section, false);
+          return renderHierarchyNode(section, 1);
         }
         return '';
       }).join('') : ''}
@@ -1525,7 +1716,7 @@ export default function PlayerManager() {
 
     <div class="footer">
       <p><strong>System Kontroli Umiejętności</strong> • Raport wygenerowany automatycznie</p>
-      <p style="margin-top: 10px;">Nieocenione umiejętności oznaczone są symbolem "—" na czerwonym tle</p>
+      <p style="margin-top: 10px;">Kliknij na sekcję aby ją rozwinąć/zwinąć • Nieocenione umiejętności oznaczone "—"</p>
     </div>
   </div>
 </body>
