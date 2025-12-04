@@ -8,14 +8,24 @@
 - Zmiany automatycznie propagują się do WSZYSTKICH zawodników
 - Brak możliwości edycji struktury u poszczególnych zawodników (tylko trener)
 
-### 2. **Ankieta Single-Page**
+### 2. **📤 Import/Export Struktury Umiejętności** ✨ NOWE!
+- **Eksport struktury** - tylko hierarchia bez ocen (do współdzielenia)
+- **Import struktury** - wczytanie struktury od innego trenera
+- 🔴 **Czerwone oznaczenie** nowych umiejętności (domyślnie 5)
+- Automatyczne zachowanie wszystkich istniejących ocen
+- Nieocenione umiejętności podświetlone w ankietach
+- Po zapisaniu ankiety czerwone oznaczenie znika
+- [Pełna dokumentacja](IMPORT_EXPORT_STRUKTURY.md) | [Szybki start](QUICK_START_IMPORT_EXPORT.md)
+
+### 3. **Ankieta Single-Page**
 - Wszystkie pytania wyświetlane na jednej stronie
 - Automatyczne pogrupowanie w sekcje i podsekcje
 - Hierarchiczna wizualizacja (Sekcja → Podsekcja → Pytania)
 - Licznik pytań i sekcji
 - Sticky footer z przyciskami akcji
+- Wizualne oznaczanie nieocenionych umiejętności (czerwone tło)
 
-### 3. **Wybór Poziomu przy Generowaniu Linku**
+### 4. **Wybór Poziomu przy Generowaniu Linku**
 - Trener wybiera od którego poziomu wygenerować ankietę
 - Możliwość wygenerowania:
   - Całego profilu (wszystkie umiejętności)
