@@ -99,6 +99,7 @@ src/
 - [CHANGELOG_v2.md](./CHANGELOG_v2.md) - Szczegółowy opis zmian w wersji 2.0
 - [SYSTEM_ZAWODNIKOW.md](./SYSTEM_ZAWODNIKOW.md) - Guide systemu zawodników
 - [PRZEWODNIK.md](./PRZEWODNIK.md) - Przewodnik hierarchii
+- [GUIDE_KTORY_EKSPORT.md](./GUIDE_KTORY_EKSPORT.md) - 📊 **Który eksport wybrać?** (przewodnik)
 - [IMPORT_EXPORT_STRUKTURY.md](./IMPORT_EXPORT_STRUKTURY.md) - 📤 Import/Export struktury
 - [QUICK_START_IMPORT_EXPORT.md](./QUICK_START_IMPORT_EXPORT.md) - ⚡ Szybki start importu/exportu struktury
 - [IMPORT_EXPORT_ZAWODNIKOW.md](./IMPORT_EXPORT_ZAWODNIKOW.md) - 👥 Import/Export zawodników
