@@ -1130,7 +1130,9 @@ export default function PlayerManager() {
       if (!rating) return null;
       // Sprawdź czy ocena nie jest oznaczona jako nieoceniona
       if (rating.unrated === true) return null;
-      return rating.value !== undefined ? rating.value : rating;
+      const value = rating.value !== undefined ? rating.value : rating;
+      // Konwertuj na liczbę aby uniknąć konkatenacji stringów
+      return typeof value === 'number' ? value : parseFloat(value);
     };
 
     const stats = {
@@ -1142,8 +1144,8 @@ export default function PlayerManager() {
     allSkills.forEach(skill => {
       ['player', 'coach', 'team'].forEach(type => {
         const value = getRatingValue(skill.id, type);
-        if (value !== null) {
-          stats[type].total += value;
+        if (value !== null && !isNaN(value)) {
+          stats[type].total += Number(value);
           stats[type].count++;
           stats[type].rated++;
         }
@@ -1161,8 +1163,8 @@ export default function PlayerManager() {
       let count = 0;
       skills.forEach(skill => {
         const value = getRatingValue(skill.id, type);
-        if (value !== null) {
-          total += value;
+        if (value !== null && !isNaN(value)) {
+          total += Number(value);
           count++;
         }
       });

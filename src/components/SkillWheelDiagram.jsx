@@ -184,17 +184,19 @@ export default function SkillWheelDiagram({
     if (ratingType === 'player' && ratings.player && ratings.player.value !== undefined) {
       // Pomiń jeśli nieoceniona
       if (ratings.player.unrated === true) return null;
-      return ratings.player.value;
+      // Konwertuj na liczbę
+      return Number(ratings.player.value);
     } else if (ratingType === 'coach' && ratings.coach && ratings.coach.value !== undefined) {
       // Pomiń jeśli nieoceniona
       if (ratings.coach.unrated === true) return null;
-      return ratings.coach.value;
+      // Konwertuj na liczbę
+      return Number(ratings.coach.value);
     } else if (ratingType === 'team' && ratings.team && ratings.team.length > 0) {
       // Dla team oblicz średnią ze wszystkich ankiet zespołowych dla tej umiejętności
       // Pomiń nieocenione
       const validRatings = ratings.team.filter(r => r.unrated !== true);
       if (validRatings.length === 0) return null;
-      const sum = validRatings.reduce((acc, rating) => acc + rating.value, 0);
+      const sum = validRatings.reduce((acc, rating) => acc + Number(rating.value), 0);
       return sum / validRatings.length;
     }
 
