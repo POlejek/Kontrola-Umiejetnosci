@@ -689,15 +689,24 @@ export default function PlayerManager() {
             </p>
           </div>
 
-          {/* Przycisk edytora struktury */}
-          <div className="mb-6">
+          {/* Przyciski edytora struktury i instrukcji */}
+          <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
             <button
               onClick={() => setView('editor')}
-              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-indigo-700 transition flex items-center justify-center gap-2 shadow-lg"
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-indigo-700 transition flex items-center justify-center gap-2 shadow-lg"
             >
               <FileText size={20} />
               Edytuj Strukturę Umiejętności (Trener)
             </button>
+            <a
+              href="instrukcja.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-gradient-to-r from-green-600 to-teal-600 text-white px-6 py-3 rounded-lg hover:from-green-700 hover:to-teal-700 transition flex items-center justify-center gap-2 shadow-lg"
+            >
+              <FileText size={20} />
+              📚 Instrukcja Użytkownika
+            </a>
           </div>
 
           {/* Sekcja: Pełny Backup (Struktura + Zawodnicy) */}
