@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instrukcja - System Kontroli Umiejętności</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px;
+      color: #333;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px;
+      text-align: center;
+    }
+    .header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    .header p {
+      font-size: 1.1em;
+      opacity: 0.9;
+    }
+    .content {
+      padding: 40px;
+    }
+    .section {
+      margin-bottom: 40px;
+    }
+    .section-title {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 15px 25px;
+      border-radius: 10px;
+      font-size: 1.5em;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+    }
+    .subsection {
+      margin: 25px 0;
+      padding-left: 20px;
+      border-left: 4px solid #667eea;
+    }
+    .subsection h3 {
+      color: #667eea;
+      margin-bottom: 10px;
+      font-size: 1.3em;
+    }
+    .feature-box {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 15px 0;
+      border-left: 4px solid #667eea;
+    }
+    .feature-box h4 {
+      color: #667eea;
+      margin-bottom: 10px;
+      font-size: 1.1em;
+    }
+    .steps {
+      background: #e8eaf6;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 15px 0;
+    }
+    .steps ol {
+      margin-left: 20px;
+    }
+    .steps li {
+      margin: 10px 0;
+      padding-left: 10px;
+    }
+    .warning {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 5px;
+    }
+    .tip {
+      background: #d1f2eb;
+      border-left: 4px solid #10b981;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 5px;
+    }
+    .screenshot {
+      text-align: center;
+      margin: 20px 0;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 10px;
+    }
+    .footer {
+      background: #f8f9fa;
+      padding: 30px;
+      text-align: center;
+      border-top: 3px solid #667eea;
+    }
+    code {
+      background: #f8f9fa;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      color: #667eea;
+    }
+    .button {
+      display: inline-block;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 12px 30px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      margin: 10px 5px;
+      box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+      transition: transform 0.2s;
+    }
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(102, 126, 234, 0.4);
+    }
+    .icon {
+      font-size: 2em;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📚 Instrukcja Użytkownika</h1>
+      <p>System Kontroli Umiejętności Zawodników</p>
+      <p style="margin-top: 20px;">
+        <a href="index.html" class="button">🏠 Powrót do Aplikacji</a>
+      </p>
+    </div>
+
+    <div class="content">
+      
+      <!-- WPROWADZENIE -->
+      <div class="section">
+        <div class="section-title">🎯 Wprowadzenie</div>
+        <p>System Kontroli Umiejętności to kompleksowa aplikacja do zarządzania i oceny umiejętności zawodników sportowych. Pozwala na:</p>
+        <ul style="margin: 20px 0 20px 40px;">
+          <li>Definiowanie hierarchicznej struktury umiejętności (trener)</li>
+          <li>Zarządzanie wieloma zawodnikami</li>
+          <li>Przeprowadzanie ankiet oceniających (zawodnik, trener, zespół)</li>
+          <li>Wizualizację wyników na diagramach radarowych</li>
+          <li>Generowanie profesjonalnych raportów</li>
+          <li>Import i export danych</li>
+        </ul>
+      </div>
+
+      <!-- DLA TRENERA -->
+      <div class="section">
+        <div class="section-title">👨‍🏫 Dla Trenera</div>
+        
+        <div class="subsection">
+          <h3>📝 Edycja Struktury Umiejętności</h3>
+          <p>Jako trener możesz definiować hierarchię umiejętności dla wszystkich zawodników.</p>
+          
+          <div class="steps">
+            <ol>
+              <li>Na ekranie głównym kliknij <strong>"Edytuj Strukturę Umiejętności (Trener)"</strong></li>
+              <li>Dodawaj sekcje (np. MENTAL, Taktyczne) używając przycisku z ikoną "+"</li>
+              <li>Dodawaj umiejętności do sekcji</li>
+              <li>Twórz podsekcje dla bardziej szczegółowej hierarchii</li>
+              <li>Kliknij <strong>"Zapisz i Propaguj do Wszystkich"</strong></li>
+            </ol>
+          </div>
+          
+          <div class="warning">
+            <strong>⚠️ Ważne:</strong> Zmiany w strukturze automatycznie propagują się do WSZYSTKICH zawodników. Nowe umiejętności będą oznaczone na czerwono (wymagają oceny).
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>📤 Import/Export Struktury</h3>
+          <p>Współdziel strukturę umiejętności z innymi trenerami lub zachowaj backup.</p>
+          
+          <div class="feature-box">
+            <h4>Export Struktury</h4>
+            <p>W edytorze struktury kliknij <strong>"Eksportuj Strukturę"</strong>. Pobierze się plik JSON bez ocen - idealny do współdzielenia.</p>
+          </div>
+          
+          <div class="feature-box">
+            <h4>Import Struktury</h4>
+            <p>W edytorze struktury kliknij <strong>"Importuj Strukturę"</strong> i wybierz plik JSON. Nowe umiejętności będą dodane, istniejące oceny zachowane.</p>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>🔗 Generowanie Linków do Ankiet</h3>
+          <p>Twórz linki do ankiet dla zawodników, trenerów lub zespołu.</p>
+          
+          <div class="steps">
+            <ol>
+              <li>Kliknij zawodnika z listy</li>
+              <li>Kliknij przycisk <strong>"Wygeneruj Link"</strong></li>
+              <li>Wybierz typ ankiety: <strong>Zawodnik / Trener / Zespół</strong></li>
+              <li>Wybierz poziom (cały profil lub konkretna sekcja)</li>
+              <li>Link zostanie skopiowany - wyślij go zawodnikowi/zespołowi</li>
+            </ol>
+          </div>
+          
+          <div class="tip">
+            <strong>💡 Wskazówka:</strong> Możesz wygenerować link tylko do wybranej sekcji (np. tylko MENTAL), aby skrócić ankietę.
+          </div>
+        </div>
+      </div>
+
+      <!-- ZARZĄDZANIE ZAWODNIKAMI -->
+      <div class="section">
+        <div class="section-title">👥 Zarządzanie Zawodnikami</div>
+        
+        <div class="subsection">
+          <h3>➕ Dodawanie Zawodnika</h3>
+          <div class="steps">
+            <ol>
+              <li>Kliknij <strong>"Dodaj nowego zawodnika"</strong></li>
+              <li>Wpisz imię i nazwisko</li>
+              <li>Kliknij <strong>"Dodaj"</strong></li>
+            </ol>
+          </div>
+          
+          <div class="warning">
+            <strong>⚠️ Duplikaty:</strong> System nie pozwoli dodać zawodnika o istniejącym nazwisku (wielkość liter nie ma znaczenia).
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>🗑️ Usuwanie Zawodnika</h3>
+          <p>Kliknij czerwoną ikonę kosza obok nazwiska zawodnika. Potwierdzenie wymagane - tej operacji nie można cofnąć!</p>
+        </div>
+
+        <div class="subsection">
+          <h3>📊 Przeglądanie Profilu</h3>
+          <div class="steps">
+            <ol>
+              <li>Kliknij nazwisko zawodnika z listy</li>
+              <li>Zobaczysz diagram radarowy z wizualizacją umiejętności</li>
+              <li>Możesz przełączać widok między: Zawodnik / Trener / Zespół</li>
+              <li>Kliknij sekcję na diagramie aby zobaczyć szczegóły</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>📥 Import/Export Zawodników</h3>
+          
+          <div class="feature-box">
+            <h4>Export Zawodników</h4>
+            <p>Kliknij <strong>"Eksportuj Zawodników"</strong> w sekcji "Tylko Zawodnicy". Pobierze się plik JSON z danymi zawodników bez struktury.</p>
+          </div>
+          
+          <div class="feature-box">
+            <h4>Import Zawodników</h4>
+            <p>Kliknij <strong>"Importuj Zawodników"</strong> i wybierz plik JSON.</p>
+            <div class="steps">
+              <strong>Tryby importu:</strong>
+              <ul style="margin-left: 20px; margin-top: 10px;">
+                <li><strong>DODAJ</strong> - zachowuje obecnych zawodników, dodaje nowych
+                  <ul style="margin-left: 20px;">
+                    <li>Sprawdza duplikaty po nazwisku</li>
+                    <li>Pokazuje modal porównawczy dla duplikatów</li>
+                    <li>Możesz wybrać którą wersję zachować</li>
+                  </ul>
+                </li>
+                <li><strong>NADPISZ</strong> - usuwa wszystkich obecnych, wstawia tylko z pliku (bez sprawdzania duplikatów)</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="tip">
+            <strong>💡 Idealne dla:</strong> Transferu zawodników między klubami, backup danych, współpraca między trenerami.
+          </div>
+        </div>
+      </div>
+
+      <!-- ANKIETY -->
+      <div class="section">
+        <div class="section-title">📝 Wypełnianie Ankiet</div>
+        
+        <div class="subsection">
+          <h3>🔗 Rozpoczęcie Ankiety przez Link</h3>
+          <div class="steps">
+            <ol>
+              <li>Otrzymaj link od trenera (e-mail, SMS, komunikator)</li>
+              <li>Otwórz link w przeglądarce</li>
+              <li>Zobaczysz ankietę z wszystkimi pytaniami na jednej stronie</li>
+              <li>Pytania są pogrupowane w sekcje</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>✍️ Wypełnianie Ankiety</h3>
+          <p>Dla każdej umiejętności:</p>
+          <div class="steps">
+            <ol>
+              <li>Przeczytaj nazwę umiejętności</li>
+              <li>Przesuń suwak od 1 (najsłabiej) do 10 (najlepiej)</li>
+              <li>Aktualna wartość pokazuje się po prawej stronie</li>
+            </ol>
+          </div>
+          
+          <div class="feature-box">
+            <h4>🔴 Czerwone Oznaczenia</h4>
+            <p>Umiejętności oznaczone na czerwono to te, które nie zostały jeszcze ocenione. Po zapisaniu ankiety czerwone oznaczenie zniknie.</p>
+          </div>
+          
+          <div class="steps">
+            <strong>Zapisywanie:</strong>
+            <ol>
+              <li>Po wypełnieniu wszystkich pytań przewiń na dół</li>
+              <li>Kliknij <strong>"Zapisz Ankietę"</strong></li>
+              <li>Zobaczysz potwierdzenie i przejdziesz do diagramu</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>📊 Typy Ankiet</h3>
+          <ul style="margin-left: 20px;">
+            <li><strong>Ankieta Zawodnika</strong> - samoocena zawodnika</li>
+            <li><strong>Ankieta Trenera</strong> - ocena przez trenera</li>
+            <li><strong>Ankieta Zespołowa</strong> - ocena przez kolegów z drużyny
+              <ul style="margin-left: 20px;">
+                <li>Możesz wypełnić wiele ankiet zespołowych</li>
+                <li>Na diagramie pokazuje się ostatnia</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- RAPORTY -->
+      <div class="section">
+        <div class="section-title">📊 Generator Raportów</div>
+        
+        <div class="subsection">
+          <h3>📥 Generowanie Raportu</h3>
+          <div class="steps">
+            <ol>
+              <li>Otwórz profil zawodnika</li>
+              <li>Kliknij przycisk <strong>"Pobierz Raport"</strong> (fioletowo-niebieski)</li>
+              <li>Raport otworzy się w nowym oknie przeglądarki</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>📋 Zawartość Raportu</h3>
+          
+          <div class="feature-box">
+            <h4>1. Nagłówek</h4>
+            <p>Imię i nazwisko zawodnika oraz data i godzina wygenerowania raportu.</p>
+          </div>
+          
+          <div class="feature-box">
+            <h4>2. Karty Statystyk Globalnych</h4>
+            <p>Trzy karty z kluczowymi wskaźnikami:</p>
+            <ul style="margin-left: 20px;">
+              <li><strong>Ocena Zawodnika</strong> - średnia ze wszystkich samoocen</li>
+              <li><strong>Ocena Trenera</strong> - średnia z ocen trenera</li>
+              <li><strong>Ocena Zespołowa</strong> - średnia z ostatniej ankiety zespołowej</li>
+            </ul>
+            <p style="margin-top: 10px;">Każda karta pokazuje także licznik: ile umiejętności ocenionych / łącznie.</p>
+          </div>
+          
+          <div class="feature-box">
+            <h4>3. Sekcje i Podsekcje</h4>
+            <p>Dla każdej sekcji (np. MENTAL, Taktyczne):</p>
+            <ul style="margin-left: 20px;">
+              <li><strong>Nagłówek sekcji</strong> - gradient fioletowo-niebieski</li>
+              <li><strong>3 karty statystyk sekcji</strong> - średnie dla tej sekcji (Zawodnik/Trener/Zespół)</li>
+              <li><strong>Tabela umiejętności</strong> - wszystkie umiejętności z ocenami</li>
+            </ul>
+            <p style="margin-top: 10px;">Jeśli sekcja ma podsekcje (np. Atakowanie, Obrona), każda podsekcja ma:</p>
+            <ul style="margin-left: 20px;">
+              <li><strong>Nagłówek podsekcji</strong> - gradient fioletowo-różowy</li>
+              <li><strong>3 karty statystyk podsekcji</strong></li>
+              <li><strong>Tabela umiejętności</strong> tylko z tej podsekcji</li>
+            </ul>
+          </div>
+          
+          <div class="feature-box">
+            <h4>4. Kolorowanie Ocen</h4>
+            <ul style="margin-left: 20px;">
+              <li><strong style="color: #dc2626;">Czerwone "—"</strong> - umiejętność nieoceniona</li>
+              <li><strong style="color: #d97706;">Żółte (1-4)</strong> - niska ocena</li>
+              <li><strong style="color: #2563eb;">Niebieskie (5-7)</strong> - średnia ocena</li>
+              <li><strong style="color: #059669;">Zielone (8-10)</strong> - wysoka ocena</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>🖨️ Drukowanie i Zapis</h3>
+          <div class="steps">
+            <strong>Zapis do PDF:</strong>
+            <ol>
+              <li>W oknie raportu naciśnij <code>Ctrl+P</code> (Windows/Linux) lub <code>Cmd+P</code> (Mac)</li>
+              <li>Wybierz <strong>"Zapisz jako PDF"</strong></li>
+              <li>Wybierz lokalizację i nazwę pliku</li>
+              <li>Kliknij <strong>"Zapisz"</strong></li>
+            </ol>
+          </div>
+          
+          <div class="tip">
+            <strong>💡 Kiedy używać:</strong> Spotkania z rodzicami, indywidualne rozmowy z zawodnikami, prezentacje postępów, archiwizacja wyników.
+          </div>
+        </div>
+      </div>
+
+      <!-- BACKUP -->
+      <div class="section">
+        <div class="section-title">💾 Backup i Przywracanie</div>
+        
+        <div class="subsection">
+          <h3>📤 Pełny Backup</h3>
+          <p>Eksportuje WSZYSTKO: strukturę umiejętności + wszystkich zawodników z ocenami.</p>
+          <div class="steps">
+            <ol>
+              <li>Kliknij <strong>"Eksportuj Wszystko"</strong> w sekcji "Pełny Backup"</li>
+              <li>Pobierze się plik JSON z datą (np. <code>skill-tracker-2025-12-04.json</code>)</li>
+              <li>Zapisz plik w bezpiecznym miejscu</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>📥 Przywracanie z Backupu</h3>
+          <div class="steps">
+            <ol>
+              <li>Kliknij <strong>"Importuj Wszystko"</strong> w sekcji "Pełny Backup"</li>
+              <li>Wybierz plik JSON backupu</li>
+              <li>Potwierdź operację</li>
+            </ol>
+          </div>
+          
+          <div class="warning">
+            <strong>⚠️ Uwaga:</strong> Import pełnego backupu NADPISUJE wszystkie obecne dane (struktura + zawodnicy). Operacji nie można cofnąć!
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>🔄 Częstotliwość Backupów</h3>
+          <div class="tip">
+            <strong>Zalecane:</strong>
+            <ul style="margin: 10px 0 0 20px;">
+              <li><strong>Pełny backup:</strong> Co tydzień lub po ważnych zmianach</li>
+              <li><strong>Backup struktury:</strong> Po każdej zmianie struktury umiejętności</li>
+              <li><strong>Backup zawodników:</strong> Po dodaniu/aktualizacji wielu zawodników</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- WYKRYWANIE DUPLIKATÓW -->
+      <div class="section">
+        <div class="section-title">🛡️ System Wykrywania Duplikatów</div>
+        
+        <div class="subsection">
+          <h3>🚫 Podczas Ręcznego Dodawania</h3>
+          <p>Gdy próbujesz dodać zawodnika o nazwisku już istniejącym w systemie:</p>
+          <ul style="margin-left: 20px;">
+            <li>System pokazuje alert ostrzegawczy</li>
+            <li>Zawodnik NIE zostaje dodany</li>
+            <li>Porównanie jest case-insensitive (Jan Kowalski = jan kowalski)</li>
+          </ul>
+        </div>
+
+        <div class="subsection">
+          <h3>📊 Podczas Importu (tryb DODAJ)</h3>
+          <p>Gdy importujesz zawodników w trybie DODAJ i są duplikaty:</p>
+          
+          <div class="steps">
+            <ol>
+              <li>System wykrywa duplikaty po nazwisku</li>
+              <li>Pojawia się <strong>modal porównawczy</strong> z tabelą</li>
+              <li>Dla każdego duplikatu widzisz:
+                <ul style="margin-left: 20px;">
+                  <li>Obecny zawodnik: data utworzenia, liczba ocen</li>
+                  <li>Importowany zawodnik: data utworzenia, liczba ocen</li>
+                </ul>
+              </li>
+              <li>Wybierasz dla każdego: <strong>Zachowaj obecnego</strong> lub <strong>Zastąp importowanym</strong></li>
+              <li>Klikasz <strong>"Zastosuj wybory i kontynuuj"</strong></li>
+              <li>Pozostali zawodnicy (bez duplikatów) są dodawani automatycznie</li>
+            </ol>
+          </div>
+          
+          <div class="tip">
+            <strong>💡 Domyślnie:</strong> Wszystkie duplikaty mają zaznaczone "Zachowaj obecnego" - bezpieczniejsza opcja chroniąca przed utratą danych.
+          </div>
+        </div>
+      </div>
+
+      <!-- CZERWONE OZNACZENIA -->
+      <div class="section">
+        <div class="section-title">🔴 Czerwone Oznaczenia</div>
+        
+        <div class="subsection">
+          <h3>❓ Co to znaczy?</h3>
+          <p>Czerwone tło, ramka i badge "🔴 NOWA - WYMAGA OCENY" oznacza, że umiejętność nie została jeszcze oceniona dla danego typu ankiety.</p>
+        </div>
+
+        <div class="subsection">
+          <h3>🎯 Kiedy się pojawia?</h3>
+          <ul style="margin-left: 20px;">
+            <li>Po dodaniu nowego zawodnika (wszystkie umiejętności czerwone)</li>
+            <li>Po imporcie struktury z nowymi umiejętnościami</li>
+            <li>Po zmianie struktury przez trenera</li>
+            <li>Gdy otwierasz ankietę typu, którego jeszcze nie wypełniłeś</li>
+          </ul>
+        </div>
+
+        <div class="subsection">
+          <h3>✅ Jak usunąć czerwone?</h3>
+          <p>Wypełnij ankietę i zapisz. Po zapisaniu czerwone oznaczenie automatycznie znika dla ocenionych umiejętności.</p>
+          
+          <div class="warning">
+            <strong>⚠️ Pamiętaj:</strong> Każdy typ ankiety (Zawodnik/Trener/Zespół) ma osobne czerwone oznaczenia. Wypełnienie ankiety zawodnika nie usuwa czerwonego z ankiety trenera.
+          </div>
+        </div>
+      </div>
+
+      <!-- PRZECHOWYWANIE DANYCH -->
+      <div class="section">
+        <div class="section-title">💾 Przechowywanie Danych</div>
+        
+        <div class="subsection">
+          <h3>🔒 Gdzie są dane?</h3>
+          <p>Wszystkie dane są zapisywane <strong>lokalnie w Twojej przeglądarce</strong> (localStorage). Oznacza to:</p>
+          <ul style="margin-left: 20px;">
+            <li>✅ Pełna prywatność - dane nie są wysyłane na żaden serwer</li>
+            <li>✅ Działa offline po pierwszym załadowaniu</li>
+            <li>✅ Szybki dostęp - wszystko jest lokalne</li>
+            <li>⚠️ Dane są powiązane z przeglądarką i urządzeniem</li>
+            <li>⚠️ Wyczyszczenie danych przeglądarki usunie wszystko</li>
+          </ul>
+        </div>
+
+        <div class="subsection">
+          <h3>🔄 Przenoszenie danych między urządzeniami</h3>
+          <div class="steps">
+            <ol>
+              <li>Na urządzeniu źródłowym: <strong>Eksportuj Wszystko</strong></li>
+              <li>Prześlij plik JSON na drugie urządzenie (e-mail, USB, chmura)</li>
+              <li>Na urządzeniu docelowym: <strong>Importuj Wszystko</strong></li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <h3>⚠️ Ważne zasady bezpieczeństwa</h3>
+          <div class="warning">
+            <ul style="margin-left: 20px;">
+              <li>Regularnie twórz backupy (eksport)</li>
+              <li>Nie czyść danych przeglądarki bez backupu</li>
+              <li>Testuj import/export na niewielkich danych</li>
+              <li>Nazywaj pliki backupu z datą dla łatwej identyfikacji</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <div class="section">
+        <div class="section-title">❓ Najczęściej Zadawane Pytania</div>
+        
+        <div class="feature-box">
+          <h4>Czy mogę edytować strukturę u pojedynczego zawodnika?</h4>
+          <p>Nie. Struktura jest globalna dla wszystkich zawodników. Zmiana przez trenera propaguje się wszędzie. To zapewnia spójność i standaryzację.</p>
+        </div>
+        
+        <div class="feature-box">
+          <h4>Co się stanie z ocenami po zmianie struktury?</h4>
+          <p>Istniejące oceny są zachowane. Nowe umiejętności będą czerwone (nieocenione). Usunięte umiejętności stracą oceny.</p>
+        </div>
+        
+        <div class="feature-box">
+          <h4>Ile ankiet zespołowych mogę wypełnić?</h4>
+          <p>Nieograniczoną liczbę. System zapisuje wszystkie, ale na diagramie pokazuje ostatnią.</p>
+        </div>
+        
+        <div class="feature-box">
+          <h4>Czy mogę cofnąć usunięcie zawodnika?</h4>
+          <p>Nie, dlatego przed usunięciem system pyta o potwierdzenie. Zawsze rób backup przed dużymi zmianami.</p>
+        </div>
+        
+        <div class="feature-box">
+          <h4>Czy mogę używać aplikacji na telefonie?</h4>
+          <p>Tak! Aplikacja jest responsywna i działa na urządzeniach mobilnych. Najlepsze doświadczenie masz jednak na komputerze/tablecie.</p>
+        </div>
+        
+        <div class="feature-box">
+          <h4>Jak długo są przechowywane dane?</h4>
+          <p>Dopóki nie wyczyszczysz danych przeglądarki lub nie usuniesz ich ręcznie. Brak limitu czasowego.</p>
+        </div>
+      </div>
+
+      <!-- SKRÓTY KLAWISZOWE -->
+      <div class="section">
+        <div class="section-title">⌨️ Przydatne Skróty</div>
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead style="background: #f8f9fa;">
+            <tr>
+              <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Akcja</th>
+              <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Windows/Linux</th>
+              <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Mac</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding: 10px; border: 1px solid #ddd;">Zapisz raport jako PDF</td>
+              <td style="padding: 10px; border: 1px solid #ddd;"><code>Ctrl + P</code></td>
+              <td style="padding: 10px; border: 1px solid #ddd;"><code>Cmd + P</code></td>
+            </tr>
+            <tr>
+              <td style="padding: 10px; border: 1px solid #ddd;">Odśwież stronę</td>
+              <td style="padding: 10px; border: 1px solid #ddd;"><code>Ctrl + R</code> lub <code>F5</code></td>
+              <td style="padding: 10px; border: 1px solid #ddd;"><code>Cmd + R</code></td>
+            </tr>
+            <tr>
+              <td style="padding: 10px; border: 1px solid #ddd;">Zapisz plik (raport HTML)</td>
+              <td style="padding: 10px; border: 1px solid #ddd;"><code>Ctrl + S</code></td>
+              <td style="padding: 10px; border: 1px solid #ddd;"><code>Cmd + S</code></td>
+            </tr>
+            <tr>
+              <td style="padding: 10px; border: 1px solid #ddd;">Pełny ekran</td>
+              <td style="padding: 10px; border: 1px solid #ddd;"><code>F11</code></td>
+              <td style="padding: 10px; border: 1px solid #ddd;"><code>Cmd + Ctrl + F</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- KONTAKT -->
+      <div class="section">
+        <div class="section-title">📧 Wsparcie</div>
+        <p style="text-align: center; font-size: 1.1em;">
+          W razie problemów lub pytań skontaktuj się z administratorem systemu lub trenerem głównym.
+        </p>
+        <p style="text-align: center; margin-top: 20px;">
+          <a href="index.html" class="button">🏠 Powrót do Aplikacji</a>
+        </p>
+      </div>
+
+    </div>
+
+    <div class="footer">
+      <p><strong>System Kontroli Umiejętności</strong> • Wersja 2.5</p>
+      <p style="margin-top: 10px;">Instrukcja wygenerowana: 4 grudnia 2025</p>
+    </div>
+  </div>
+</body>
+</html>
