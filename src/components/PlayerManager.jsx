@@ -1128,6 +1128,8 @@ export default function PlayerManager() {
     const getRatingValue = (skillId, type) => {
       const rating = ratings[skillId]?.[type];
       if (!rating) return null;
+      // Sprawdź czy ocena nie jest oznaczona jako nieoceniona
+      if (rating.unrated === true) return null;
       return rating.value !== undefined ? rating.value : rating;
     };
 
