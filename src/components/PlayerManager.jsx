@@ -1165,18 +1165,29 @@ export default function PlayerManager() {
       const avgCoach = calculateAverage(skills, 'coach');
       const avgTeam = calculateAverage(skills, 'team');
       
-      const formatAvg = (avg) => avg !== null ? avg : '—';
+      const formatAvg = (avg) => avg !== null ? avg : 'Brak';
       
       const titleClass = isSubsection ? 'subsection-title' : 'section-title';
       
       return `
         <div class="section">
-          <div class="${titleClass}">
-            ${section.name}
-            <span style="float: right; font-size: 0.85em; opacity: 0.9;">
-              Średnia: Z=${formatAvg(avgPlayer)} | T=${formatAvg(avgCoach)} | Zesp=${formatAvg(avgTeam)}
-            </span>
+          <div class="${titleClass}">${section.name}</div>
+          
+          <div class="section-stats">
+            <div class="section-stat-card player">
+              <div class="section-stat-label">Zawodnik</div>
+              <div class="section-stat-value">${formatAvg(avgPlayer)}</div>
+            </div>
+            <div class="section-stat-card coach">
+              <div class="section-stat-label">Trener</div>
+              <div class="section-stat-value">${formatAvg(avgCoach)}</div>
+            </div>
+            <div class="section-stat-card team">
+              <div class="section-stat-label">Zespół</div>
+              <div class="section-stat-value">${formatAvg(avgTeam)}</div>
+            </div>
           </div>
+          
           ${renderSkillsOrSubsections(section)}
         </div>
       `;
@@ -1191,15 +1202,17 @@ export default function PlayerManager() {
       
       if (hasSubsections) {
         // Renderuj podsekcje
-        return node.children.map(subsection => {
-          if (subsection.type === 'subsection') {
-            return renderSection(subsection, true);
+        return node.children.map(child => {
+          if (child.type === 'subsection') {
+            return renderSection(child, true);
           }
           return '';
         }).join('');
       } else {
-        // Renderuj tabelę z umiejętnościami
-        const skills = node.children.filter(child => child.type === 'skill');
+        // Renderuj tabelę z umiejętnościami - wszystkie dzieci które są umiejętnościami
+        const allLeaves = collectAllSkills(node);
+        
+        if (allLeaves.length === 0) return '';
         
         return `
           <table class="skills-table">
@@ -1212,7 +1225,7 @@ export default function PlayerManager() {
               </tr>
             </thead>
             <tbody>
-              ${skills.map(skill => {
+              ${allLeaves.map(skill => {
                 const playerVal = getRatingValue(skill.id, 'player');
                 const coachVal = getRatingValue(skill.id, 'coach');
                 const teamVal = getRatingValue(skill.id, 'team');
@@ -1344,6 +1357,50 @@ export default function PlayerManager() {
       font-size: 1.1em;
       margin: 20px 0 15px 0;
       box-shadow: 0 3px 8px rgba(139, 92, 246, 0.3);
+    }
+    .section-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin: 20px 0;
+    }
+    .section-stat-card {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+      border: 2px solid;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .section-stat-card.player {
+      border-color: #3b82f6;
+    }
+    .section-stat-card.coach {
+      border-color: #10b981;
+    }
+    .section-stat-card.team {
+      border-color: #f59e0b;
+    }
+    .section-stat-label {
+      font-size: 0.75em;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      opacity: 0.7;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    .section-stat-value {
+      font-size: 1.8em;
+      font-weight: bold;
+    }
+    .section-stat-card.player .section-stat-value {
+      color: #3b82f6;
+    }
+    .section-stat-card.coach .section-stat-value {
+      color: #10b981;
+    }
+    .section-stat-card.team .section-stat-value {
+      color: #f59e0b;
     }
     .skills-table {
       width: 100%;
