@@ -148,6 +148,12 @@ export default function PlayerManager() {
   const [selectedPlayerForLink, setSelectedPlayerForLink] = useState(null);
   const [selectedSurveyType, setSelectedSurveyType] = useState(null);
 
+  // Stan dla rozwiązywania duplikatów
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [duplicates, setDuplicates] = useState([]);
+  const [duplicateChoices, setDuplicateChoices] = useState({});
+  const [pendingImportData, setPendingImportData] = useState(null);
+
   // Wczytaj dane z localStorage przy starcie
   useEffect(() => {
     // Wczytaj globalną strukturę umiejętności
@@ -193,6 +199,19 @@ export default function PlayerManager() {
 
   const addPlayer = () => {
     if (newPlayerName.trim()) {
+      // Sprawdź duplikaty (bez względu na wielkość liter)
+      const normalizedName = newPlayerName.trim().toLowerCase();
+      const existingPlayer = players.find(p => p.name.toLowerCase() === normalizedName);
+      
+      if (existingPlayer) {
+        alert(
+          `Zawodnik o imieniu "${existingPlayer.name}" już istnieje!\n\n` +
+          `Nie można dodać duplikatu.\n` +
+          `Jeśli chcesz zaktualizować dane, usuń starego zawodnika i dodaj ponownie.`
+        );
+        return;
+      }
+
       const newPlayer = {
         id: `player-${Date.now()}`,
         name: newPlayerName.trim(),
@@ -213,6 +232,85 @@ export default function PlayerManager() {
     const children = node.skills || node.children || [];
     children.forEach(child => collectAllSkillIds(child, ids));
     return ids;
+  };
+
+  // Funkcja pomocnicza: wykryj duplikaty po imieniu
+  const findDuplicates = (existingPlayers, newPlayers) => {
+    const duplicates = [];
+    
+    newPlayers.forEach(newPlayer => {
+      const normalizedNewName = newPlayer.name.toLowerCase().trim();
+      const existing = existingPlayers.find(
+        ep => ep.name.toLowerCase().trim() === normalizedNewName
+      );
+      
+      if (existing) {
+        duplicates.push({
+          name: newPlayer.name,
+          existing: existing,
+          imported: newPlayer
+        });
+      }
+    });
+    
+    return duplicates;
+  };
+
+  // Funkcja: zastosuj wybory użytkownika dla duplikatów
+  const applyDuplicateChoices = () => {
+    if (!pendingImportData) return;
+
+    const { importedPlayers, shouldAdd, currentSkillIds } = pendingImportData;
+    
+    // Przygotuj ostateczną listę zawodników
+    let finalPlayers = [...players];
+    
+    // Dla każdego duplikatu zastosuj wybór
+    duplicates.forEach(dup => {
+      const choice = duplicateChoices[dup.name];
+      
+      if (choice === 'existing') {
+        // Zachowaj istniejącego - nic nie rób
+        return;
+      } else if (choice === 'imported') {
+        // Zastąp istniejącego importowanym
+        const importedPlayer = importedPlayers.find(
+          p => p.name.toLowerCase().trim() === dup.name.toLowerCase().trim()
+        );
+        if (importedPlayer) {
+          finalPlayers = finalPlayers.map(p => 
+            p.id === dup.existing.id ? importedPlayer : p
+          );
+        }
+      }
+    });
+    
+    // Dodaj zawodników bez duplikatów
+    const duplicateNames = new Set(duplicates.map(d => d.name.toLowerCase().trim()));
+    const nonDuplicates = importedPlayers.filter(
+      ip => !duplicateNames.has(ip.name.toLowerCase().trim())
+    );
+    
+    if (shouldAdd) {
+      finalPlayers = [...finalPlayers, ...nonDuplicates];
+    }
+    
+    setPlayers(finalPlayers);
+    localStorage.setItem('skillTrackerPlayers', JSON.stringify(finalPlayers));
+    
+    // Zamknij modal
+    setShowDuplicateModal(false);
+    setDuplicates([]);
+    setDuplicateChoices({});
+    setPendingImportData(null);
+    
+    alert(
+      `✅ Import zakończony!\\n\\n` +
+      `Duplikaty rozwiązane: ${duplicates.length}\\n` +
+      `Dodanych nowych: ${nonDuplicates.length}\\n` +
+      `Łącznie zawodników: ${finalPlayers.length}`
+    );
+    setView('players');
   };
 
   // Funkcja pomocnicza: oznacz nowe umiejętności jako nieocenione
@@ -472,29 +570,60 @@ export default function PlayerManager() {
           };
         });
 
-        // DODAJ lub NADPISZ w zależności od wyboru
-        const newPlayers = shouldAdd 
-          ? [...players, ...importedPlayers]  // Dodaj do istniejących
-          : importedPlayers;                   // Nadpisz (tylko nowi)
-
-        setPlayers(newPlayers);
-        localStorage.setItem('skillTrackerPlayers', JSON.stringify(newPlayers));
-        
-        const resultMessage = shouldAdd
-          ? `✅ Dodano ${importedPlayers.length} zawodników!\n\n` +
-            `Łącznie masz teraz: ${newPlayers.length} zawodników.\n` +
-            `Zawodnicy mają aktualną strukturę umiejętności.\n` +
-            `Nowe umiejętności są oznaczone CZERWONYM (ocena 5).\n\n` +
-            `Wypełnij ankiety aby usunąć czerwone oznaczenie.`
-          : `✅ Nadpisano wszystkich zawodników!\n\n` +
+        // W trybie NADPISZ - po prostu zastąp wszystkich
+        if (!shouldAdd) {
+          setPlayers(importedPlayers);
+          localStorage.setItem('skillTrackerPlayers', JSON.stringify(importedPlayers));
+          
+          alert(
+            `✅ Nadpisano wszystkich zawodników!\n\n` +
             `Poprzednich zawodników: ${players.length} (usunięto)\n` +
             `Nowych zawodników: ${importedPlayers.length}\n` +
             `Zawodnicy mają aktualną strukturę umiejętności.\n` +
             `Nowe umiejętności są oznaczone CZERWONYM (ocena 5).\n\n` +
-            `Wypełnij ankiety aby usunąć czerwone oznaczenie.`;
+            `Wypełnij ankiety aby usunąć czerwone oznaczenie.`
+          );
+          setView('players');
+          return;
+        }
 
-        alert(resultMessage);
-        setView('players');
+        // W trybie DODAJ - sprawdź duplikaty
+        const foundDuplicates = findDuplicates(players, importedPlayers);
+        
+        if (foundDuplicates.length > 0) {
+          // Są duplikaty - pokaż modal do rozwiązania
+          setDuplicates(foundDuplicates);
+          
+          // Ustaw domyślne wybory na 'existing'
+          const defaultChoices = {};
+          foundDuplicates.forEach(dup => {
+            defaultChoices[dup.name] = 'existing';
+          });
+          setDuplicateChoices(defaultChoices);
+          
+          // Zapisz dane do późniejszego użycia
+          setPendingImportData({
+            importedPlayers,
+            shouldAdd: true,
+            currentSkillIds
+          });
+          
+          setShowDuplicateModal(true);
+        } else {
+          // Brak duplikatów - dodaj wszystkich
+          const newPlayers = [...players, ...importedPlayers];
+          setPlayers(newPlayers);
+          localStorage.setItem('skillTrackerPlayers', JSON.stringify(newPlayers));
+          
+          alert(
+            `✅ Dodano ${importedPlayers.length} zawodników!\n\n` +
+            `Łącznie masz teraz: ${newPlayers.length} zawodników.\n` +
+            `Zawodnicy mają aktualną strukturę umiejętności.\n` +
+            `Nowe umiejętności są oznaczone CZERWONYM (ocena 5).\n\n` +
+            `Wypełnij ankiety aby usunąć czerwone oznaczenie.`
+          );
+          setView('players');
+        }
       } catch (error) {
         alert('Błąd podczas importu zawodników: ' + error.message);
       }
@@ -747,6 +876,129 @@ export default function PlayerManager() {
               <li>Wszystkie dane są zapisywane lokalnie w przeglądarce</li>
             </ul>
           </div>
+
+          {/* Modal rozwiązywania duplikatów przy imporcie */}
+          {showDuplicateModal && duplicates.length > 0 && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden">
+                <div className="p-6 border-b border-gray-200">
+                  <h2 className="text-2xl font-bold text-gray-800">
+                    ⚠️ Znaleziono duplikaty
+                  </h2>
+                  <p className="text-sm text-gray-600 mt-2">
+                    Poniżsi zawodnicy już istnieją w aplikacji. Wybierz, którą wersję chcesz zachować:
+                  </p>
+                </div>
+
+                <div className="p-6 overflow-y-auto max-h-[60vh]">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="bg-gray-100">
+                        <th className="border border-gray-300 p-3 text-left font-semibold">
+                          Imię i nazwisko
+                        </th>
+                        <th className="border border-gray-300 p-3 text-center font-semibold w-1/3">
+                          Obecny w aplikacji
+                        </th>
+                        <th className="border border-gray-300 p-3 text-center font-semibold w-1/3">
+                          Importowany
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {duplicates.map((dup, idx) => {
+                        const existingRatingsCount = Object.keys(dup.existing.ratings || {}).length;
+                        const importedRatingsCount = Object.keys(dup.imported.ratings || {}).length;
+                        
+                        return (
+                          <tr key={idx} className="hover:bg-gray-50">
+                            <td className="border border-gray-300 p-3 font-medium">
+                              {dup.name}
+                            </td>
+                            <td className="border border-gray-300 p-3 text-center">
+                              <div className="flex flex-col items-center space-y-2">
+                                <div className="text-sm text-gray-600">
+                                  <div>Utworzony: {dup.existing.createdAt ? new Date(dup.existing.createdAt).toLocaleDateString('pl-PL') : 'N/A'}</div>
+                                  <div>Ocen: {existingRatingsCount}</div>
+                                </div>
+                                <label className="flex items-center space-x-2 cursor-pointer">
+                                  <input
+                                    type="radio"
+                                    name={`duplicate-${idx}`}
+                                    checked={duplicateChoices[dup.name] === 'existing'}
+                                    onChange={() => {
+                                      setDuplicateChoices(prev => ({
+                                        ...prev,
+                                        [dup.name]: 'existing'
+                                      }));
+                                    }}
+                                    className="w-4 h-4"
+                                  />
+                                  <span className="text-sm font-medium">Zachowaj obecnego</span>
+                                </label>
+                              </div>
+                            </td>
+                            <td className="border border-gray-300 p-3 text-center">
+                              <div className="flex flex-col items-center space-y-2">
+                                <div className="text-sm text-gray-600">
+                                  <div>Utworzony: {dup.imported.createdAt ? new Date(dup.imported.createdAt).toLocaleDateString('pl-PL') : 'N/A'}</div>
+                                  <div>Ocen: {importedRatingsCount}</div>
+                                </div>
+                                <label className="flex items-center space-x-2 cursor-pointer">
+                                  <input
+                                    type="radio"
+                                    name={`duplicate-${idx}`}
+                                    checked={duplicateChoices[dup.name] === 'imported'}
+                                    onChange={() => {
+                                      setDuplicateChoices(prev => ({
+                                        ...prev,
+                                        [dup.name]: 'imported'
+                                      }));
+                                    }}
+                                    className="w-4 h-4"
+                                  />
+                                  <span className="text-sm font-medium">Zastąp importowanym</span>
+                                </label>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+
+                  <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                      <strong>ℹ️ Informacja:</strong> Pozostali zawodnicy (bez duplikatów) zostaną dodani automatycznie.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-6 border-t border-gray-200 bg-gray-50 flex gap-3">
+                  <button
+                    onClick={() => {
+                      setShowDuplicateModal(false);
+                      setDuplicates([]);
+                      setDuplicateChoices({});
+                      setPendingImportData(null);
+                    }}
+                    className="flex-1 bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 transition font-semibold"
+                  >
+                    Anuluj import
+                  </button>
+                  <button
+                    onClick={() => {
+                      applyDuplicateChoices();
+                      setShowDuplicateModal(false);
+                    }}
+                    className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-semibold"
+                  >
+                    Zastosuj wybory i kontynuuj import
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Modal wyboru poziomu ankiety */}
           {showLevelSelector && selectedPlayerForLink && (

@@ -23,7 +23,17 @@ Kompleksowa aplikacja do zarządzania i wizualizacji umiejętności zawodników 
 - Elastyczne zarządzanie: osobno struktura, osobno zawodnicy
 - Idealne do transferu zawodników między klubami/systemami
 - Nowe umiejętności w strukturze → automatycznie czerwone przy imporcie
+- 🛡️ **Wykrywanie duplikatów** - zabezpieczenie przed przypadkowym nadpisaniem
 - [📖 Szczegółowa dokumentacja](IMPORT_EXPORT_ZAWODNIKOW.md) | [⚡ Szybki start](QUICK_START_ZAWODNICY.md)
+
+### 🛡️ System Wykrywania Duplikatów
+- Automatyczna detekcja zawodników o tych samych nazwiskach (case-insensitive)
+- **Blokada przy ręcznym tworzeniu** - ostrzeżenie jeśli zawodnik już istnieje
+- **Modal porównawczy przy imporcie** - tabela z porównaniem duplikatów
+- Wybór której wersji zachować (obecny vs importowany)
+- Szczegóły: data utworzenia, liczba ocen
+- Chroni przed utratą danych
+- [📖 Szczegółowa dokumentacja](WYKRYWANIE_DUPLIKATOW.md)
 
 ### 📄 Ankiety Single-Page
 - Wszystkie pytania na jednej stronie

@@ -22,9 +22,22 @@
 - **Import zawodników** - automatyczne dopasowanie do aktualnej struktury
 - Rozdzielenie: struktura osobno, zawodnicy osobno
 - Elastyczne zarządzanie przy transferach między klubami
-- Import DODAJE zawodników (nie nadpisuje)
+- Import DODAJE zawodników (nie nadpisuje) lub NADPISUJE wszystkich
 - Nowe umiejętności w strukturze → czerwone przy imporcie (ocena 5)
+- 🛡️ **Wykrywanie duplikatów** - modal porównawczy przy konflikcie nazw
 - [Pełna dokumentacja](IMPORT_EXPORT_ZAWODNIKOW.md) | [Szybki start](QUICK_START_ZAWODNICY.md)
+
+### 2c. **🛡️ System Wykrywania Duplikatów** ✨ NOWE!
+- **Automatyczna detekcja** zawodników o identycznych nazwiskach
+- **Porównanie case-insensitive** (Jan Kowalski = jan kowalski)
+- **Blokada przy ręcznym tworzeniu** - alert jeśli zawodnik już istnieje
+- **Modal porównawczy przy imporcie** (tylko tryb DODAJ):
+  - Tabela z duplikatami (obecny vs importowany)
+  - Szczegóły: data utworzenia, liczba ocen
+  - Wybór którą wersję zachować dla każdego duplikatu
+  - Pozostali zawodnicy dodawani automatycznie
+- **Chroni przed utratą danych** podczas importu
+- [Pełna dokumentacja](WYKRYWANIE_DUPLIKATOW.md)
 
 ### 3. **Ankieta Single-Page**
 - Wszystkie pytania wyświetlane na jednej stronie

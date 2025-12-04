@@ -100,7 +100,25 @@ Pierwsze pytanie:
 
 Tryby:
 - **DODAJ** - zachowuje obecnych zawodników, dodaje nowych
+  - ⚠️ **WYKRYWA DUPLIKATY** - jeśli zawodnik o tej samej nazwie już istnieje, pojawi się modal wyboru
 - **NADPISZ** - usuwa wszystkich obecnych, wstawia tylko nowych
+  - ℹ️ Nie sprawdza duplikatów (celowo zastępuje wszystkich)
+
+#### 2️⃣a **Wykrywanie duplikatów (tylko tryb DODAJ)**
+
+Jeśli w trybie DODAJ system znajdzie zawodników o **takich samych nazwiskach** (wielkość liter nie ma znaczenia):
+
+1. **Pojawia się modal porównawczy** z tabelą duplikatów
+2. Dla każdego duplikatu widzisz:
+   - Obecny w aplikacji (data utworzenia, liczba ocen)
+   - Importowany (data utworzenia, liczba ocen)
+3. **Wybierasz którą wersję zachować:**
+   - "Zachowaj obecnego" - obecny pozostaje, importowany odrzucany
+   - "Zastąp importowanym" - obecny nadpisywany importowanym
+4. Kliknij **"Zastosuj wybory i kontynuuj import"**
+5. Pozostali zawodnicy (bez duplikatów) są dodawani automatycznie
+
+📖 **Szczegóły:** Zobacz [WYKRYWANIE_DUPLIKATOW.md](WYKRYWANIE_DUPLIKATOW.md)
 
 #### 3️⃣ **Dopasowanie do aktualnej struktury**
 Każdy zawodnik otrzymuje:
