@@ -91,24 +91,37 @@ Główny ekran → Sekcja "👥 Tylko Zawodnicy"
 - Sprawdzenie czy plik ma `"type": "players-only"`
 - Sprawdzenie czy zawiera tablicę `players`
 
-#### 2️⃣ **Dopasowanie do aktualnej struktury**
+#### 2️⃣ **Wybór trybu: Dodaj lub Nadpisz**
+Pierwsze pytanie:
+```
+[OK] = DODAJ do istniejących (3 + 2 = 5)
+[Anuluj] = NADPISZ wszystkich (zostanie tylko 2)
+```
+
+Tryby:
+- **DODAJ** - zachowuje obecnych zawodników, dodaje nowych
+- **NADPISZ** - usuwa wszystkich obecnych, wstawia tylko nowych
+
+#### 3️⃣ **Dopasowanie do aktualnej struktury**
 Każdy zawodnik otrzymuje:
 - **Aktualną strukturę umiejętności** z systemu
 - **Swoje oceny** z pliku (zachowane)
 
-#### 3️⃣ **Oznaczanie nowych umiejętności**
+#### 4️⃣ **Oznaczanie nowych umiejętności**
 System porównuje:
 - **Stare ID** (z ocen zawodnika w pliku)
 - **Nowe ID** (z aktualnej struktury)
 
-Jeśli w aktualnej strukturze są umiejętności, których nie ma w ocenach:
+Jeśli w aktualnej strukturie są umiejętności, których nie ma w ocenach:
 - Dodaje je z oceną **5**
 - Oznacza flagą `unrated: true`
 - **Wyświetla na CZERWONO** w ankietach
 
-#### 4️⃣ **Dodanie do systemu**
-- Zawodnicy są **DODAWANI** do istniejących (nie nadpisują)
-- Jeśli masz 3 zawodników i importujesz 2 → będziesz mieć 5
+#### 5️⃣ **Zastosowanie wybranego trybu**
+- **Tryb DODAJ**: Zawodnicy są **DODAWANI** do istniejących
+  - Masz 3 zawodników + importujesz 2 → będziesz mieć 5
+- **Tryb NADPISZ**: Zawodnicy są **ZASTĘPOWANI**
+  - Masz 3 zawodników + importujesz 2 → będziesz mieć 2 (nowych)
 
 ---
 
@@ -182,8 +195,10 @@ Jeśli w aktualnej strukturze są umiejętności, których nie ma w ocenach:
 | **Struktura** | ✅ TAK | ✅ TAK | ❌ NIE |
 | **Zawodnicy** | ✅ TAK | ❌ NIE | ✅ TAK |
 | **Oceny** | ✅ TAK | ❌ NIE | ✅ TAK |
-| **Import: nadpisuje** | Wszystko | Strukturę | Nic (dodaje) |
-| **Import: dodaje** | - | - | Zawodników |
+| **Import nadpisuje** | Wszystko | Strukturę | Opcjonalnie* |
+| **Import dodaje** | - | - | Opcjonalnie* |
+
+_* Wybór trybu: DODAJ (dodaje) lub NADPISZ (nadpisuje)_
 | **Nazwa pliku** | `kontrola-...-backup-...` | `struktura-...` | `zawodnicy-...` |
 | **Cel** | Pełny backup | Współdzielenie struktury | Transfer zawodników |
 
@@ -224,11 +239,18 @@ Po zmianach: Eksportuj strukturę (gdy zmieniasz)
 - **Dopasowuje** oceny - zachowuje co się da
 - **Oznacza CZERWONYM** nowe umiejętności
 
+### ✅ Tryb importu:
+- **DODAJ** - zachowuje obecnych zawodników, dodaje nowych z pliku
+- **NADPISZ** - usuwa wszystkich obecnych, wstawia tylko z pliku
+- Wybór jest potwierdzany dwukrotnie (bezpieczeństwo)
+- Tryb NADPISZ nie można cofnąć - zrób backup!
+
 ### ✅ Duplikaty:
 - System **NIE sprawdza** duplikatów po imieniu
-- Jeśli zaimportujesz tego samego zawodnika 2x → będziesz mieć 2 wpisy
+- W trybie DODAJ: jeśli zaimportujesz tego samego zawodnika 2x → będziesz mieć 2 wpisy
+- W trybie NADPISZ: zastępujesz wszystkich, więc duplikaty nie wystąpią
 - Każdy zawodnik ma unikalny ID (timestamp)
-- Musisz ręcznie usuwać duplikaty jeśli trzeba
+- Musisz ręcznie usuwać duplikaty jeśli trzeba (tryb DODAJ)
 
 ### ✅ Zgodność struktur:
 - Jeśli struktury są **identyczne** → wszystkie oceny zachowane
@@ -255,10 +277,10 @@ Po zmianach: Eksportuj strukturę (gdy zmieniasz)
 - Jeśli struktury są niekompatybilne - oceń ręcznie
 
 ### Problem: Zawodnik zaimportował się 2 razy
-**Przyczyna:** Import dodaje, nie nadpisuje  
+**Przyczyna:** Wybrałeś tryb DODAJ i zaimportowałeś tego samego zawodnika ponownie
 **Rozwiązanie:**
 - Usuń duplikat ręcznie (przycisk 🗑️)
-- Przy następnym imporcie uważaj
+- Przy następnym imporcie użyj trybu NADPISZ lub uważaj na duplikaty
 
 ### Problem: Część ocen zniknęła
 **Przyczyna:** ID umiejętności się zmieniły między strukturami  

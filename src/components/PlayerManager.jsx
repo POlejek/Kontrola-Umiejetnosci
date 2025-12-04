@@ -403,7 +403,7 @@ export default function PlayerManager() {
   };
 
   // Import TYLKO zawodników (dopasowanie do aktualnej struktury)
-  const importPlayers = (event) => {
+  const importPlayers = (event, shouldReplace = false) => {
     const file = event.target.files[0];
     if (!file) return;
 
@@ -421,46 +421,80 @@ export default function PlayerManager() {
         // Zbierz ID z aktualnej struktury
         const currentSkillIds = collectAllSkillIds(globalSkillTree);
 
-        // Pytanie o potwierdzenie
-        if (window.confirm(
-          `Czy na pewno chcesz zaimportować zawodników?\n\n` +
+        // Najpierw pytaj o tryb (dodać czy nadpisać)
+        const mode = window.confirm(
+          `WYBIERZ TRYB IMPORTU:\n\n` +
           `Data eksportu: ${new Date(importedData.exportDate).toLocaleString('pl-PL')}\n` +
-          `Liczba zawodników: ${importedData.players.length}\n\n` +
-          `Zawodnicy otrzymają AKTUALNĄ strukturę umiejętności.\n` +
-          `Oceny zostaną dopasowane - nowe umiejętności będą CZERWONE (ocena 5).`
-        )) {
-          // Przygotuj zawodników z aktualną strukturą
-          const importedPlayers = importedData.players.map(importedPlayer => {
-            // Zbierz stare ID z ocen zawodnika
-            const playerRatingIds = new Set(Object.keys(importedPlayer.ratings || {}));
-            
-            // Dopasuj oceny do aktualnej struktury
-            const adjustedRatings = markNewSkillsAsUnrated(
-              importedPlayer.ratings || {},
-              playerRatingIds,
-              currentSkillIds
-            );
+          `Liczba zawodników w pliku: ${importedData.players.length}\n` +
+          `Aktualna liczba zawodników: ${players.length}\n\n` +
+          `⚠️ UWAGA - Wybierz opcję:\n\n` +
+          `[OK] = DODAJ do istniejących (${players.length} + ${importedData.players.length} = ${players.length + importedData.players.length})\n` +
+          `[Anuluj] = NADPISZ wszystkich (zostanie tylko ${importedData.players.length})`
+        );
 
-            return {
-              ...importedPlayer,
-              skillTree: JSON.parse(JSON.stringify(globalSkillTree)), // Aktualna struktura
-              ratings: adjustedRatings
-            };
-          });
+        const shouldAdd = mode; // true = dodaj, false = nadpisz
 
-          // DODAJ do istniejących zawodników (nie nadpisuj)
-          const newPlayers = [...players, ...importedPlayers];
-          setPlayers(newPlayers);
-          localStorage.setItem('skillTrackerPlayers', JSON.stringify(newPlayers));
-          
-          alert(
-            `Zaimportowano ${importedPlayers.length} zawodników!\n\n` +
-            `Zawodnicy mają aktualną strukturę umiejętności.\n` +
-            `Nowe umiejętności (których nie było w ich ocenach) są oznaczone CZERWONYM (ocena 5).\n\n` +
-            `Wypełnij ankiety aby usunąć czerwone oznaczenie.`
-          );
-          setView('players');
+        // Drugie potwierdzenie z wybranym trybem
+        const confirmMessage = shouldAdd
+          ? `Potwierdzasz DODANIE ${importedData.players.length} zawodników?\n\n` +
+            `Aktualni zawodnicy zostaną ZACHOWANI.\n` +
+            `Po imporcie będziesz mieć ${players.length + importedData.players.length} zawodników.\n\n` +
+            `Zawodnicy otrzymają AKTUALNĄ strukturę umiejętności.\n` +
+            `Nowe umiejętności będą CZERWONE (ocena 5).`
+          : `⚠️ UWAGA! Potwierdzasz NADPISANIE?\n\n` +
+            `Wszyscy aktualni zawodnicy (${players.length}) zostaną USUNIĘCI!\n` +
+            `Zostaną zastąpieni ${importedData.players.length} zawodnikami z pliku.\n\n` +
+            `Zawodnicy otrzymają AKTUALNĄ strukturę umiejętności.\n` +
+            `Nowe umiejętności będą CZERWONE (ocena 5).\n\n` +
+            `TEJ OPERACJI NIE MOŻNA COFNĄĆ!`;
+
+        if (!window.confirm(confirmMessage)) {
+          alert('Import anulowany.');
+          return;
         }
+
+        // Przygotuj zawodników z aktualną strukturą
+        const importedPlayers = importedData.players.map(importedPlayer => {
+          // Zbierz stare ID z ocen zawodnika
+          const playerRatingIds = new Set(Object.keys(importedPlayer.ratings || {}));
+          
+          // Dopasuj oceny do aktualnej struktury
+          const adjustedRatings = markNewSkillsAsUnrated(
+            importedPlayer.ratings || {},
+            playerRatingIds,
+            currentSkillIds
+          );
+
+          return {
+            ...importedPlayer,
+            skillTree: JSON.parse(JSON.stringify(globalSkillTree)), // Aktualna struktura
+            ratings: adjustedRatings
+          };
+        });
+
+        // DODAJ lub NADPISZ w zależności od wyboru
+        const newPlayers = shouldAdd 
+          ? [...players, ...importedPlayers]  // Dodaj do istniejących
+          : importedPlayers;                   // Nadpisz (tylko nowi)
+
+        setPlayers(newPlayers);
+        localStorage.setItem('skillTrackerPlayers', JSON.stringify(newPlayers));
+        
+        const resultMessage = shouldAdd
+          ? `✅ Dodano ${importedPlayers.length} zawodników!\n\n` +
+            `Łącznie masz teraz: ${newPlayers.length} zawodników.\n` +
+            `Zawodnicy mają aktualną strukturę umiejętności.\n` +
+            `Nowe umiejętności są oznaczone CZERWONYM (ocena 5).\n\n` +
+            `Wypełnij ankiety aby usunąć czerwone oznaczenie.`
+          : `✅ Nadpisano wszystkich zawodników!\n\n` +
+            `Poprzednich zawodników: ${players.length} (usunięto)\n` +
+            `Nowych zawodników: ${importedPlayers.length}\n` +
+            `Zawodnicy mają aktualną strukturę umiejętności.\n` +
+            `Nowe umiejętności są oznaczone CZERWONYM (ocena 5).\n\n` +
+            `Wypełnij ankiety aby usunąć czerwone oznaczenie.`;
+
+        alert(resultMessage);
+        setView('players');
       } catch (error) {
         alert('Błąd podczas importu zawodników: ' + error.message);
       }

@@ -27,8 +27,19 @@ zawodnicy-2025-12-04.json
 
 ### ⚠️ WAŻNE - Przeczytaj przed importem!
 
-Import zawodników:
-- ✅ **DODAJE** zawodników (nie usuwa starych)
+Import zawodników oferuje 2 tryby:
+
+**Tryb DODAJ:**
+- ✅ **DODAJE** zawodników do istniejących
+- ✅ Zachowuje obecnych zawodników
+- ✅ Użyj gdy: transfer, współpraca, dodawanie nowych
+
+**Tryb NADPISZ:**
+- ⚠️ **USUWA** wszystkich obecnych zawodników
+- ⚠️ Wstawia tylko zawodników z pliku
+- ⚠️ Użyj gdy: restore, start od zera, pełna migracja
+
+**Wspólne dla obu trybów:**
 - ✅ Używa **AKTUALNEJ struktury** (z Twojego systemu)
 - ✅ Zachowuje oceny (tam gdzie ID się zgadza)
 - 🔴 **Nowe umiejętności → CZERWONE (ocena 5)**
@@ -51,21 +62,42 @@ Najpierw zaimportuj strukturę jeśli potrzeba!
 └─────────────────────────────────────┘
 ```
 
-#### 3️⃣ Potwierdź
+#### 3️⃣ Wybierz tryb
 ```
 ┌──────────────────────────────────────┐
-│ Importować 3 zawodników?             │
+│ WYBIERZ TRYB IMPORTU:                │
 │                                      │
-│ Zawodnicy otrzymają AKTUALNĄ         │
-│ strukturę umiejętności.              │
+│ Zawodników w pliku: 3                │
+│ Aktualna liczba: 5                   │
 │                                      │
-│ Nowe umiejętności: CZERWONE (5)      │
+│ [OK] = DODAJ (5 + 3 = 8)            │
+│ [Anuluj] = NADPISZ (zostanie 3)    │
+└──────────────────────────────────────┘
+```
+
+#### 4️⃣ Potwierdź wybór
+```
+Tryb DODAJ:
+┌──────────────────────────────────────┐
+│ Dodać 3 zawodników?                  │
+│ Aktualni zostaną ZACHOWANI           │
+│ Po imporcie: 8 zawodników            │
+│                                      │
+│      [Anuluj]    [OK]               │
+└──────────────────────────────────────┘
+
+Tryb NADPISZ:
+┌──────────────────────────────────────┐
+│ ⚠️ NADPISAĆ wszystkich?              │
+│ Aktualni (5) zostaną USUNIĘCI!       │
+│ Zostanie tylko 3 z pliku             │
+│ TEJ OPERACJI NIE MOŻNA COFNĄĆ!       │
 │                                      │
 │      [Anuluj]    [OK]               │
 └──────────────────────────────────────┘
 ```
 
-#### 4️⃣ Oceń czerwone
+#### 5️⃣ Oceń czerwone
 ```
 Otwórz profil → Ankieta → Czerwone pytania
                                 ↓

@@ -167,14 +167,15 @@ RESTORE:
 | **Struktura** | ✅ TAK | ✅ TAK | ❌ NIE |
 | **Zawodnicy** | ✅ TAK | ❌ NIE | ✅ TAK |
 | **Oceny** | ✅ TAK | ❌ NIE | ✅ TAK |
-| **Import nadpisuje** | Wszystko | Strukturę | Nic (dodaje) |
+| **Import nadpisuje** | Wszystko | Strukturę | Do wyboru** |
 | **Rozmiar pliku** | 🔴 Duży | 🟢 Mały | 🟡 Średni |
 | **Przycisk (kolor)** | 🟢 Zielony | 🟢 Zielony | 🔵 Niebieski |
 | **Lokalizacja** | Główny ekran | W edytorze | Główny ekran |
 | **Cel** | Backup/Restore | Współdzielenie | Transfer |
 | **Czerwone przy imporcie** | NIE | TAK* | TAK* |
 
-_* Nowe umiejętności są czerwone (ocena 5)_
+_* Nowe umiejętności są czerwone (ocena 5)_  
+_** Tryb DODAJ (dodaje) lub NADPISZ (zastępuje wszystkich)_
 
 ---
 
@@ -230,6 +231,17 @@ W EDYTORZE STRUKTURY:
 
 ### "Backup co tydzień (lekki)"
 → **👥 Zawodnicy** (struktura zmienia się rzadko)
+
+### "Import zawodników - dodać czy nadpisać?"
+**Tryb DODAJ** gdy:
+- Chcesz zachować obecnych zawodników
+- Dodajesz nowych z innego systemu
+- Transfer pojedynczych zawodników
+
+**Tryb NADPISZ** gdy:
+- Chcesz zacząć od zera z nową listą
+- Restore z backupu (tylko zawodnicy)
+- Migracja kompletna
 
 ---
 
