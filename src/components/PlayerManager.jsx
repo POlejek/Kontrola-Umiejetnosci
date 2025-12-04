@@ -1606,12 +1606,48 @@ export default function PlayerManager() {
       font-size: 0.9em;
     }
     
+    /* Przyciski akcji */
+    .action-buttons {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 1000;
+    }
+    .action-btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95em;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    }
+    .save-btn {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+    }
+    .print-btn {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: white;
+    }
+    
     @media print {
       body { background: white; padding: 0; }
       .report-container { box-shadow: none; }
       .node-header { cursor: default; }
       .node-content { display: block !important; }
       .toggle-icon { display: none; }
+      .action-buttons { display: none; }
     }
   </style>
   <script>
@@ -1643,9 +1679,38 @@ export default function PlayerManager() {
       allContents.forEach(content => content.style.display = 'none');
       allIcons.forEach(icon => icon.classList.remove('open'));
     }
+    
+    // Funkcja do zapisu raportu jako HTML
+    function saveReport() {
+      const htmlContent = document.documentElement.outerHTML;
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const link = document.createElement('a');
+      const fileName = 'Raport_${currentPlayer.name.replace(/\s+/g, '_')}_' + new Date().toISOString().split('T')[0] + '.html';
+      link.href = URL.createObjectURL(blob);
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+    }
+    
+    // Funkcja do drukowania
+    function printReport() {
+      window.print();
+    }
   </script>
 </head>
 <body>
+  <!-- Przyciski akcji -->
+  <div class="action-buttons">
+    <button onclick="saveReport()" class="action-btn save-btn">
+      💾 Zapisz do pliku
+    </button>
+    <button onclick="printReport()" class="action-btn print-btn">
+      🖨️ Drukuj
+    </button>
+  </div>
+
   <div class="report-container">
     <div class="header">
       <h1>📊 Raport Zawodnika</h1>
