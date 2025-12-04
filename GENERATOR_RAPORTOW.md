@@ -99,12 +99,25 @@ Trzy karty z kluczowymi wskaźnikami:
   - Zielony = Ocena trenera
   - Pomarańczowy = Ocena zespołowa
 
-### 3. Szczegółowe Tabele
-Dla każdej sekcji umiejętności (Mental, Taktyczne, itp.):
+### 3. Szczegółowe Tabele (Hierarchia Sekcji i Podsekcji)
+Raport automatycznie rozpoznaje strukturę hierarchiczną:
 
+**Sekcje główne** (gradient fioletowo-niebieski):
 ```
 ╔══════════════════════════════════════════════════════╗
-║ MENTAL                                               ║
+║ MENTAL                    Średnia: Z=7.2│T=6.8│Zesp=7.5 ║
+╚══════════════════════════════════════════════════════╝
+```
+
+**Podsekcje** (jeśli istnieją - gradient fioletowo-różowy):
+```
+╔══════════════════════════════════════════════════════╗
+║ Atakowanie                Średnia: Z=8.1│T=7.9│Zesp=8.0 ║
+╚══════════════════════════════════════════════════════╝
+```
+
+**Tabele umiejętności:**
+```
 ╠═══════════════════════╦════════╦════════╦═══════════╣
 ║ Umiejętność           ║ Zawodnik ║ Trener ║ Zespół  ║
 ╠═══════════════════════╬════════╬════════╬═══════════╣
@@ -113,6 +126,12 @@ Dla każdej sekcji umiejętności (Mental, Taktyczne, itp.):
 ║ Pewność siebie        ║   9    ║   9    ║    —     ║
 ╚═══════════════════════╩════════╩════════╩═══════════╝
 ```
+
+**Średnie ocen:**
+- **W sekcjach głównych** - średnia ze wszystkich umiejętności w sekcji
+- **W podsekcjach** - średnia tylko z umiejętności w danej podsekcji
+- **Format**: Z=Zawodnik | T=Trener | Zesp=Zespół
+- **Symbol "—"** gdy brak ocen w danej kategorii
 
 **Kolorowanie ocen:**
 - **Czerwone** (—) = Nieoceniona

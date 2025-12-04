@@ -1070,33 +1070,48 @@ export default function PlayerManager() {
   const generatePlayerReport = () => {
     if (!currentPlayer) return;
 
-    // Zbierz wszystkie umiejętności (liście)
-    const collectLeafSkills = (node, path = '', sectionName = '') => {
-      const skills = [];
+    const ratings = currentPlayer.ratings || {};
+
+    // Funkcja pomocnicza: Buduj hierarchię z sekcjami i podsekcjami
+    const buildHierarchy = (node, level = 0) => {
       const children = node.skills || node.children || [];
       
       if (children.length === 0 && node.id && node.id !== 'root') {
-        // To jest liść (pytanie)
-        skills.push({
+        // To jest liść (pytanie/umiejętność)
+        return {
+          type: 'skill',
           id: node.id,
-          name: node.name,
-          path: path,
-          section: sectionName
-        });
-      } else {
-        // To jest węzeł pośredni - rekurencja
-        children.forEach(child => {
-          const newPath = path ? `${path} > ${child.name}` : child.name;
-          const newSection = !sectionName ? child.name : sectionName;
-          skills.push(...collectLeafSkills(child, newPath, newSection));
-        });
+          name: node.name
+        };
       }
       
+      // To jest sekcja lub podsekcja
+      const processedChildren = children.map(child => buildHierarchy(child, level + 1));
+      
+      return {
+        type: level === 0 ? 'root' : (level === 1 ? 'section' : 'subsection'),
+        id: node.id,
+        name: node.name,
+        children: processedChildren
+      };
+    };
+
+    const hierarchy = buildHierarchy(currentPlayer.skillTree);
+
+    // Zbierz wszystkie umiejętności (liście) dla globalnych statystyk
+    const collectAllSkills = (node) => {
+      const skills = [];
+      if (node.type === 'skill') {
+        skills.push(node);
+      } else if (node.children) {
+        node.children.forEach(child => {
+          skills.push(...collectAllSkills(child));
+        });
+      }
       return skills;
     };
 
-    const allSkills = collectLeafSkills(currentPlayer.skillTree);
-    const ratings = currentPlayer.ratings || {};
+    const allSkills = collectAllSkills(hierarchy);
 
     // Oblicz statystyki
     const getRatingValue = (skillId, type) => {
@@ -1127,14 +1142,107 @@ export default function PlayerManager() {
     const avgCoach = stats.coach.count > 0 ? (stats.coach.total / stats.coach.count).toFixed(2) : 'Brak';
     const avgTeam = stats.team.count > 0 ? (stats.team.total / stats.team.count).toFixed(2) : 'Brak';
 
-    // Grupuj umiejętności po sekcjach
-    const skillsBySection = {};
-    allSkills.forEach(skill => {
-      if (!skillsBySection[skill.section]) {
-        skillsBySection[skill.section] = [];
+    // Funkcja: Oblicz średnią dla zestawu umiejętności
+    const calculateAverage = (skills, type) => {
+      let total = 0;
+      let count = 0;
+      skills.forEach(skill => {
+        const value = getRatingValue(skill.id, type);
+        if (value !== null) {
+          total += value;
+          count++;
+        }
+      });
+      return count > 0 ? (total / count).toFixed(2) : null;
+    };
+
+    // Funkcja: Generuj HTML dla sekcji lub podsekcji
+    const renderSection = (section, isSubsection = false) => {
+      const skills = collectAllSkills(section);
+      
+      // Oblicz średnie dla tej sekcji
+      const avgPlayer = calculateAverage(skills, 'player');
+      const avgCoach = calculateAverage(skills, 'coach');
+      const avgTeam = calculateAverage(skills, 'team');
+      
+      const formatAvg = (avg) => avg !== null ? avg : '—';
+      
+      const titleClass = isSubsection ? 'subsection-title' : 'section-title';
+      
+      return `
+        <div class="section">
+          <div class="${titleClass}">
+            ${section.name}
+            <span style="float: right; font-size: 0.85em; opacity: 0.9;">
+              Średnia: Z=${formatAvg(avgPlayer)} | T=${formatAvg(avgCoach)} | Zesp=${formatAvg(avgTeam)}
+            </span>
+          </div>
+          ${renderSkillsOrSubsections(section)}
+        </div>
+      `;
+    };
+
+    // Funkcja: Renderuj umiejętności lub podsekcje
+    const renderSkillsOrSubsections = (node) => {
+      if (!node.children || node.children.length === 0) return '';
+      
+      // Sprawdź czy dzieci to podsekcje czy bezpośrednio umiejętności
+      const hasSubsections = node.children.some(child => child.type === 'subsection');
+      
+      if (hasSubsections) {
+        // Renderuj podsekcje
+        return node.children.map(subsection => {
+          if (subsection.type === 'subsection') {
+            return renderSection(subsection, true);
+          }
+          return '';
+        }).join('');
+      } else {
+        // Renderuj tabelę z umiejętnościami
+        const skills = node.children.filter(child => child.type === 'skill');
+        
+        return `
+          <table class="skills-table">
+            <thead>
+              <tr>
+                <th style="width: 50%;">Umiejętność</th>
+                <th style="width: 16%; text-align: center;">Zawodnik</th>
+                <th style="width: 16%; text-align: center;">Trener</th>
+                <th style="width: 16%; text-align: center;">Zespół</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${skills.map(skill => {
+                const playerVal = getRatingValue(skill.id, 'player');
+                const coachVal = getRatingValue(skill.id, 'coach');
+                const teamVal = getRatingValue(skill.id, 'team');
+                
+                const getRatingClass = (val) => {
+                  if (val === null) return 'unrated';
+                  if (val <= 4) return 'low';
+                  if (val <= 7) return 'medium';
+                  return 'high';
+                };
+                
+                const formatRating = (val) => {
+                  if (val === null) return '<span class="rating unrated">—</span>';
+                  return `<span class="rating ${getRatingClass(val)}">${val}</span>`;
+                };
+                
+                return `
+                  <tr>
+                    <td><strong>${skill.name}</strong></td>
+                    <td style="text-align: center;">${formatRating(playerVal)}</td>
+                    <td style="text-align: center;">${formatRating(coachVal)}</td>
+                    <td style="text-align: center;">${formatRating(teamVal)}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        `;
       }
-      skillsBySection[skill.section].push(skill);
-    });
+    };
 
     // Generuj HTML raportu
     const reportHTML = `
@@ -1227,6 +1335,15 @@ export default function PlayerManager() {
       font-size: 1.3em;
       margin-bottom: 20px;
       box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+    }
+    .subsection-title {
+      background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 1.1em;
+      margin: 20px 0 15px 0;
+      box-shadow: 0 3px 8px rgba(139, 92, 246, 0.3);
     }
     .skills-table {
       width: 100%;
@@ -1332,49 +1449,12 @@ export default function PlayerManager() {
     </div>
 
     <div class="content">
-      ${Object.entries(skillsBySection).map(([section, skills]) => `
-        <div class="section">
-          <div class="section-title">${section}</div>
-          <table class="skills-table">
-            <thead>
-              <tr>
-                <th style="width: 50%;">Umiejętność</th>
-                <th style="width: 16%; text-align: center;">Zawodnik</th>
-                <th style="width: 16%; text-align: center;">Trener</th>
-                <th style="width: 16%; text-align: center;">Zespół</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${skills.map(skill => {
-                const playerVal = getRatingValue(skill.id, 'player');
-                const coachVal = getRatingValue(skill.id, 'coach');
-                const teamVal = getRatingValue(skill.id, 'team');
-                
-                const getRatingClass = (val) => {
-                  if (val === null) return 'unrated';
-                  if (val <= 4) return 'low';
-                  if (val <= 7) return 'medium';
-                  return 'high';
-                };
-                
-                const formatRating = (val) => {
-                  if (val === null) return '<span class="rating unrated">—</span>';
-                  return `<span class="rating ${getRatingClass(val)}">${val}</span>`;
-                };
-                
-                return `
-                  <tr>
-                    <td><strong>${skill.name}</strong></td>
-                    <td style="text-align: center;">${formatRating(playerVal)}</td>
-                    <td style="text-align: center;">${formatRating(coachVal)}</td>
-                    <td style="text-align: center;">${formatRating(teamVal)}</td>
-                  </tr>
-                `;
-              }).join('')}
-            </tbody>
-          </table>
-        </div>
-      `).join('')}
+      ${hierarchy.children ? hierarchy.children.map(section => {
+        if (section.type === 'section') {
+          return renderSection(section, false);
+        }
+        return '';
+      }).join('') : ''}
     </div>
 
     <div class="footer">
