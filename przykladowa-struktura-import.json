@@ -1,0 +1,79 @@
+{
+  "version": "1.0",
+  "type": "skill-structure",
+  "exportDate": "2025-12-04T12:00:00.000Z",
+  "structure": {
+    "id": "root",
+    "title": "Profil Zawodnika - Rozszerzona Struktura",
+    "skills": [
+      {
+        "id": "mental-extended",
+        "name": "MENTAL (Rozszerzone)",
+        "skills": [
+          {
+            "id": "mental-ext-1",
+            "name": "Motywacja wewnętrzna",
+            "skills": []
+          },
+          {
+            "id": "mental-ext-2",
+            "name": "Odporność mentalna",
+            "skills": []
+          },
+          {
+            "id": "mental-ext-3",
+            "name": "Wytrwałość psychiczna",
+            "skills": []
+          }
+        ]
+      },
+      {
+        "id": "tech-advanced",
+        "name": "Technika Zaawansowana",
+        "skills": [
+          {
+            "id": "tech-adv-1",
+            "name": "Wykończenie akcji",
+            "skills": []
+          },
+          {
+            "id": "tech-adv-2",
+            "name": "Podania długie",
+            "skills": []
+          },
+          {
+            "id": "tech-adv-3",
+            "name": "Przyjęcie piłki w ruchu",
+            "skills": []
+          }
+        ]
+      },
+      {
+        "id": "fitness",
+        "name": "Sprawność Fizyczna",
+        "skills": [
+          {
+            "id": "fitness-1",
+            "name": "Wytrzymałość tlenowa",
+            "skills": []
+          },
+          {
+            "id": "fitness-2",
+            "name": "Wytrzymałość beztlenowa",
+            "skills": []
+          },
+          {
+            "id": "fitness-3",
+            "name": "Szybkość maksymalna",
+            "skills": []
+          },
+          {
+            "id": "fitness-4",
+            "name": "Przyspieszenie",
+            "skills": []
+          }
+        ]
+      }
+    ]
+  }
+}
