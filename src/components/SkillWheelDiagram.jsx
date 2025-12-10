@@ -731,7 +731,7 @@ export default function SkillWheelDiagram({
                   
                   <div className="space-y-4">
                     {questions.map((rating, qIdx) => (
-                      <div key={rating.id} className={`p-4 rounded-lg border-2 transition ${
+                      <div key={`${sectionIdx}-${qIdx}-${rating.id}`} className={`p-4 rounded-lg border-2 transition ${
                         rating.unrated 
                           ? 'bg-red-50 border-red-400 hover:border-red-500' 
                           : 'bg-gray-50 border-gray-200 hover:border-blue-300'
