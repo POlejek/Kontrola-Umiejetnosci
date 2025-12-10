@@ -1511,9 +1511,15 @@ export default function PlayerManager() {
       align-items: center;
       transition: all 0.2s;
       user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      min-height: 50px;
     }
     .node-header:hover {
       background: #f8f9fa;
+    }
+    .node-header:active {
+      transform: scale(0.98);
     }
     .hierarchy-node.section .node-header {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -1737,17 +1743,21 @@ export default function PlayerManager() {
         margin-bottom: 20px;
       }
       .node-header {
-        padding: 12px 15px;
+        padding: 15px;
         flex-wrap: wrap;
+        min-height: 60px;
       }
       .hierarchy-node.section .node-header {
-        padding: 15px;
+        padding: 18px 15px;
+        min-height: 65px;
       }
       .hierarchy-node.subsection .node-header {
-        padding: 12px 15px;
+        padding: 15px;
+        min-height: 60px;
       }
       .hierarchy-node.subsubsection .node-header {
-        padding: 10px 12px;
+        padding: 12px 15px;
+        min-height: 55px;
       }
       .node-title-row {
         font-size: 1em;
@@ -1849,9 +1859,17 @@ export default function PlayerManager() {
     }
   </style>
   <script>
-    function toggleNode(nodeId) {
+    function toggleNode(nodeId, event) {
+      // Zapobiegaj propagacji eventu
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      
       const content = document.getElementById(nodeId);
       const icon = document.getElementById('icon-' + nodeId);
+      
+      if (!content || !icon) return;
       
       if (content.style.display === 'none' || content.style.display === '') {
         content.style.display = 'block';
@@ -1861,6 +1879,45 @@ export default function PlayerManager() {
         icon.classList.remove('open');
       }
     }
+    
+    // Inicjalizacja po załadowaniu strony
+    document.addEventListener('DOMContentLoaded', function() {
+      // Dodaj obsługę touch events dla wszystkich nagłówków
+      const headers = document.querySelectorAll('.node-header');
+      headers.forEach(header => {
+        // Usuń inline onclick żeby nie było podwójnego wywołania
+        const onclickAttr = header.getAttribute('onclick');
+        if (onclickAttr) {
+          const nodeId = onclickAttr.match(/'([^']+)'/)[1];
+          header.removeAttribute('onclick');
+          
+          // Dodaj event listenery dla click i touch
+          header.addEventListener('click', function(e) {
+            toggleNode(nodeId, e);
+          });
+          
+          header.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            toggleNode(nodeId, e);
+          });
+          
+          // Wizualna informacja zwrotna dla touch
+          header.addEventListener('touchstart', function() {
+            header.style.opacity = '0.7';
+          });
+          
+          header.addEventListener('touchend', function() {
+            setTimeout(() => {
+              header.style.opacity = '1';
+            }, 100);
+          });
+          
+          header.addEventListener('touchcancel', function() {
+            header.style.opacity = '1';
+          });
+        }
+      });
+    });
     
     // Funkcja do rozwinięcia wszystkich sekcji
     function expandAll() {
