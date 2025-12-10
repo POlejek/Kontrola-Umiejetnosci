@@ -457,6 +457,37 @@ export default function PlayerManager() {
     alert('Dane zawodników zostały wyeksportowane (bez struktury umiejętności)!');
   };
 
+  // Funkcja do zapewnienia unikalnych ID w całej strukturze
+  const ensureUniqueIds = (node, usedIds = new Set(), pathPrefix = '') => {
+    // Dla root
+    if (node.id === 'root') {
+      usedIds.add('root');
+    } else {
+      // Dla innych węzłów - upewnij się że mają unikalne ID
+      if (!node.id || usedIds.has(node.id)) {
+        // Generuj nowe unikalne ID
+        let newId;
+        let attempt = 0;
+        do {
+          newId = `skill-${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${attempt}`;
+          attempt++;
+        } while (usedIds.has(newId));
+        
+        console.warn(`⚠️ Naprawiono brakujące/duplikat ID dla "${node.name}": ${node.id} → ${newId}`);
+        node.id = newId;
+      }
+      usedIds.add(node.id);
+    }
+
+    // Rekurencyjnie przetwórz dzieci
+    const childrenArray = node.skills || node.children || [];
+    childrenArray.forEach((child, index) => {
+      ensureUniqueIds(child, usedIds, `${pathPrefix}/${node.name || node.title}`);
+    });
+
+    return node;
+  };
+
   // Import pełnych danych (struktura + zawodnicy)
   const importData = (event) => {
     const file = event.target.files[0];
@@ -480,12 +511,16 @@ export default function PlayerManager() {
           `Liczba zawodników: ${importedData.players.length}\n\n` +
           `UWAGA: Aktualne dane (struktura + zawodnicy) zostaną nadpisane!`
         )) {
+          // Głęboka kopia i zapewnienie unikalnych ID
+          const treeCopy = JSON.parse(JSON.stringify(importedData.globalSkillTree));
+          const fixedTree = ensureUniqueIds(treeCopy);
+          
           // Import danych
-          setGlobalSkillTree(importedData.globalSkillTree);
+          setGlobalSkillTree(fixedTree);
           setPlayers(importedData.players);
           
           // Zapisz do localStorage
-          localStorage.setItem('globalSkillTree', JSON.stringify(importedData.globalSkillTree));
+          localStorage.setItem('globalSkillTree', JSON.stringify(fixedTree));
           localStorage.setItem('skillTrackerPlayers', JSON.stringify(importedData.players));
           
           alert('Pełny backup został zaimportowany!');

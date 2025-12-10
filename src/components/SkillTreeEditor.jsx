@@ -203,6 +203,37 @@ const SkillTreeEditor = ({ skillTree, onSave }) => {
     alert('Struktura umiejętności została wyeksportowana!');
   };
 
+  // Funkcja do zapewnienia unikalnych ID w całej strukturze
+  const ensureUniqueIds = (node, usedIds = new Set(), pathPrefix = '') => {
+    // Dla root
+    if (node.id === 'root') {
+      usedIds.add('root');
+    } else {
+      // Dla innych węzłów - upewnij się że mają unikalne ID
+      if (!node.id || usedIds.has(node.id)) {
+        // Generuj nowe unikalne ID
+        let newId;
+        let attempt = 0;
+        do {
+          newId = `skill-${Date.now()}-${Math.random().toString(36).substr(2, 9)}-${attempt}`;
+          attempt++;
+        } while (usedIds.has(newId));
+        
+        console.warn(`⚠️ Naprawiono brakujące/duplikat ID dla "${node.name}": ${node.id} → ${newId}`);
+        node.id = newId;
+      }
+      usedIds.add(node.id);
+    }
+
+    // Rekurencyjnie przetwórz dzieci
+    const childrenArray = node.skills || node.children || [];
+    childrenArray.forEach((child, index) => {
+      ensureUniqueIds(child, usedIds, `${pathPrefix}/${node.name || node.title}`);
+    });
+
+    return node;
+  };
+
   // Import struktury umiejętności
   const importSkillStructure = (event) => {
     const file = event.target.files[0];
@@ -225,8 +256,12 @@ const SkillTreeEditor = ({ skillTree, onSave }) => {
           `Data eksportu: ${new Date(importedData.exportDate).toLocaleString('pl-PL')}\n\n` +
           `UWAGA: Nowe umiejętności zostaną dodane do profili zawodników z oceną 5 (czerwone podświetlenie).`
         )) {
-          setEditedTree(importedData.structure);
-          alert('Struktura została zaimportowana! Kliknij "Zapisz zmiany" aby zastosować.');
+          // Głęboka kopia i zapewnienie unikalnych ID
+          const structureCopy = JSON.parse(JSON.stringify(importedData.structure));
+          const fixedStructure = ensureUniqueIds(structureCopy);
+          
+          setEditedTree(fixedStructure);
+          alert('Struktura została zaimportowana i naprawiona! Kliknij "Zapisz zmiany" aby zastosować.');
         }
       } catch (error) {
         alert('Błąd podczas importu: ' + error.message);
