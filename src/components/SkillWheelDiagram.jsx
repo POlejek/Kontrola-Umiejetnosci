@@ -307,8 +307,10 @@ export default function SkillWheelDiagram({
     
     if (childrenArray.length === 0) {
       // To jest liść - dodaj jako pytanie
+      //WAŻNE: Jeśli liść nie ma ID, wygeneruj unikalne
+      const leafId = node.id || `leaf-${node.name}-${pathPrefix.map(p => p.id).join('-')}`;
       questions.push({
-        id: node.id,
+        id: leafId,
         name: node.name,
         path: pathPrefix,
         section: pathPrefix.map(p => p.name).join(' → ')
@@ -335,6 +337,17 @@ export default function SkillWheelDiagram({
     if (allQuestions.length === 0) {
       console.error('Nie można rozpocząć ankiety - brak pytań (liści) w hierarchii');
       return;
+    }
+    
+    // DEBUG: Sprawdź czy są duplikaty ID
+    const ids = allQuestions.map(q => q.id);
+    const uniqueIds = new Set(ids);
+    if (ids.length !== uniqueIds.size) {
+      console.warn('⚠️ WYKRYTO DUPLIKATY ID W PYTANIACH!', {
+        wszystkich: ids.length,
+        unikalnych: uniqueIds.size,
+        pytania: allQuestions.map(q => ({ id: q.id, name: q.name }))
+      });
     }
     
     setSurveyType(type);
