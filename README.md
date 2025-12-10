@@ -1,5 +1,9 @@
 # Kontrola Umiejętności - Hierarchiczny Diagram
 
+> **🎉 NOWA WERSJA Z INTEGRACJĄ CHMUROWĄ!**  
+> Aplikacja została zaktualizowana o system logowania i automatyczny zapis w chmurze.  
+> **👉 Zobacz [SZYBKI_START.md](SZYBKI_START.md) aby wdrożyć nową wersję z Supabase + Netlify**
+
 Aplikacja webowa do tworzenia hierarchicznych diagramów umiejętności zawodników z systemem ankiet dla zawodników, trenerów i zespołu.
 
 ## 🚀 Funkcjonalności

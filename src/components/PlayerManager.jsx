@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { UserPlus, Users as UsersIcon, Users, Trash2, Share2, ExternalLink, FileText, Download } from 'lucide-react';
+import { UserPlus, Users as UsersIcon, Users, Trash2, Share2, ExternalLink, FileText, Download, LogOut, Save, Upload } from 'lucide-react';
 import SkillWheelDiagram from './SkillWheelDiagram';
 import SkillTreeEditor from './SkillTreeEditor';
+import { useAuth } from '../contexts/AuthContext';
+import { useSupabaseData } from '../hooks/useSupabaseData';
 
 // Domyślna struktura umiejętności
 const getDefaultSkillTree = () => ({
@@ -136,12 +138,17 @@ const getDefaultSkillTree = () => ({
 });
 
 export default function PlayerManager() {
+  const { user, signOut } = useAuth();
+  const { loadUserData, saveAllData, loading: dbLoading } = useSupabaseData();
+  
   const [players, setPlayers] = useState([]);
   const [currentPlayer, setCurrentPlayer] = useState(null);
   const [view, setView] = useState('players'); // 'players', 'diagram', 'survey-link', 'editor'
   const [newPlayerName, setNewPlayerName] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [globalSkillTree, setGlobalSkillTree] = useState(getDefaultSkillTree());
+  const [saving, setSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState(null);
   
   // Stan dla wyboru poziomu ankiety
   const [showLevelSelector, setShowLevelSelector] = useState(false);
@@ -154,28 +161,66 @@ export default function PlayerManager() {
   const [duplicateChoices, setDuplicateChoices] = useState({});
   const [pendingImportData, setPendingImportData] = useState(null);
 
-  // Wczytaj dane z localStorage przy starcie
+  // Wczytaj dane z Supabase przy starcie
   useEffect(() => {
-    // Wczytaj globalną strukturę umiejętności
-    const savedSkillTree = localStorage.getItem('globalSkillTree');
-    if (savedSkillTree) {
-      setGlobalSkillTree(JSON.parse(savedSkillTree));
-    }
+    const loadData = async () => {
+      if (!user) return;
 
-    // Wczytaj zawodników
-    const savedPlayers = localStorage.getItem('skillTrackerPlayers');
-    if (savedPlayers) {
-      const parsedPlayers = JSON.parse(savedPlayers);
-      setPlayers(parsedPlayers);
-    }
-  }, []);
+      try {
+        const { skillTree, players: loadedPlayers } = await loadUserData();
+        
+        if (skillTree) {
+          setGlobalSkillTree(skillTree);
+        }
+        
+        if (loadedPlayers && loadedPlayers.length > 0) {
+          setPlayers(loadedPlayers);
+        }
+      } catch (err) {
+        console.error('Błąd wczytywania danych:', err);
+        // Fallback do localStorage
+        const savedSkillTree = localStorage.getItem('globalSkillTree');
+        if (savedSkillTree) {
+          setGlobalSkillTree(JSON.parse(savedSkillTree));
+        }
 
-  // Zapisz dane do localStorage przy każdej zmianie
+        const savedPlayers = localStorage.getItem('skillTrackerPlayers');
+        if (savedPlayers) {
+          const parsedPlayers = JSON.parse(savedPlayers);
+          setPlayers(parsedPlayers);
+        }
+      }
+    };
+
+    loadData();
+  }, [user]);
+
+  // Auto-zapis do Supabase co 30 sekund (jeśli są zmiany)
+  useEffect(() => {
+    if (!user || players.length === 0) return;
+
+    const autoSaveInterval = setInterval(async () => {
+      try {
+        await saveAllData(globalSkillTree, players);
+        setLastSaved(new Date());
+      } catch (err) {
+        console.error('Błąd auto-zapisu:', err);
+      }
+    }, 30000); // 30 sekund
+
+    return () => clearInterval(autoSaveInterval);
+  }, [user, globalSkillTree, players]);
+
+  // Zapisz również do localStorage jako backup
   useEffect(() => {
     if (players.length > 0) {
       localStorage.setItem('skillTrackerPlayers', JSON.stringify(players));
     }
   }, [players]);
+
+  useEffect(() => {
+    localStorage.setItem('globalSkillTree', JSON.stringify(globalSkillTree));
+  }, [globalSkillTree]);
 
   // Wczytaj dane zawodnika z URL (jeśli jest parametr playerId)
   useEffect(() => {
@@ -675,11 +720,61 @@ export default function PlayerManager() {
     );
   }
 
+  // Funkcja ręcznego zapisu
+  const handleManualSave = async () => {
+    setSaving(true);
+    try {
+      await saveAllData(globalSkillTree, players);
+      setLastSaved(new Date());
+      alert('✅ Dane zostały zapisane w chmurze!');
+    } catch (err) {
+      alert('❌ Błąd zapisu: ' + err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    if (window.confirm('Czy na pewno chcesz się wylogować?')) {
+      await signOut();
+    }
+  };
+
   // Widok listy zawodników
   if (view === 'players') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
         <div className="max-w-6xl mx-auto">
+          {/* Nagłówek z przyciskami zapisu i wylogowania */}
+          <div className="bg-white rounded-xl shadow-lg p-4 mb-6 flex justify-between items-center">
+            <div>
+              <p className="text-sm text-gray-600">Zalogowany jako:</p>
+              <p className="font-semibold text-gray-800">{user?.email}</p>
+              {lastSaved && (
+                <p className="text-xs text-green-600 mt-1">
+                  Ostatni zapis: {lastSaved.toLocaleTimeString('pl-PL')}
+                </p>
+              )}
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={handleManualSave}
+                disabled={saving}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center gap-2 disabled:opacity-50"
+              >
+                <Save size={18} />
+                {saving ? 'Zapisywanie...' : 'Zapisz Teraz'}
+              </button>
+              <button
+                onClick={handleSignOut}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center gap-2"
+              >
+                <LogOut size={18} />
+                Wyloguj
+              </button>
+            </div>
+          </div>
+
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-800 mb-2">
               System Kontroli Umiejętności
