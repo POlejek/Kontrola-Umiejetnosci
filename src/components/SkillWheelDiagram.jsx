@@ -361,10 +361,11 @@ export default function SkillWheelDiagram({
   };
 
   const updateTempRating = (questionId, value) => {
-    const updated = tempRatings.map(r => 
-      r.id === questionId ? { ...r, value } : r
+    setTempRatings(prevRatings => 
+      prevRatings.map(r => 
+        r.id === questionId ? { ...r, value, unrated: false } : r
+      )
     );
-    setTempRatings(updated);
   };
 
   const submitSurvey = (callback) => {
@@ -730,42 +731,46 @@ export default function SkillWheelDiagram({
                   </h2>
                   
                   <div className="space-y-4">
-                    {questions.map((rating, qIdx) => (
-                      <div key={rating.id} className={`p-4 rounded-lg border-2 transition ${
-                        rating.unrated 
-                          ? 'bg-red-50 border-red-400 hover:border-red-500' 
-                          : 'bg-gray-50 border-gray-200 hover:border-blue-300'
-                      }`}>
-                        <label className="block font-medium text-gray-700 mb-3">
-                          <span className="text-blue-600 mr-2">#{sectionIdx + 1}.{qIdx + 1}</span>
-                          {rating.name}
-                          {rating.unrated && (
-                            <span className="ml-2 text-xs font-bold text-red-600 bg-red-100 px-2 py-1 rounded">
-                              🔴 NOWA - WYMAGA OCENY
+                    {questions.map((rating, qIdx) => {
+                      // Znajdź aktualną wartość z tempRatings dla tego konkretnego ID
+                      const currentRating = tempRatings.find(r => r.id === rating.id) || rating;
+                      return (
+                        <div key={rating.id} className={`p-4 rounded-lg border-2 transition ${
+                          currentRating.unrated 
+                            ? 'bg-red-50 border-red-400 hover:border-red-500' 
+                            : 'bg-gray-50 border-gray-200 hover:border-blue-300'
+                        }`}>
+                          <label className="block font-medium text-gray-700 mb-3">
+                            <span className="text-blue-600 mr-2">#{sectionIdx + 1}.{qIdx + 1}</span>
+                            {currentRating.name}
+                            {currentRating.unrated && (
+                              <span className="ml-2 text-xs font-bold text-red-600 bg-red-100 px-2 py-1 rounded">
+                                🔴 NOWA - WYMAGA OCENY
+                              </span>
+                            )}
+                          </label>
+                          <div className="flex items-center gap-4">
+                            <span className="text-xs text-gray-500 w-8">1</span>
+                            <input
+                              type="range"
+                              min="1"
+                              max="10"
+                              value={currentRating.value}
+                              onChange={(e) => updateTempRating(currentRating.id, Number(e.target.value))}
+                              className={`flex-1 h-2 rounded-lg appearance-none cursor-pointer ${
+                                currentRating.unrated ? 'bg-red-200 accent-red-600' : 'bg-gray-200 accent-blue-600'
+                              }`}
+                            />
+                            <span className="text-xs text-gray-500 w-8">10</span>
+                            <span className={`text-2xl font-bold w-12 text-center ${
+                              currentRating.unrated ? 'text-red-600' : 'text-blue-600'
+                            }`}>
+                              {currentRating.value}
                             </span>
-                          )}
-                        </label>
-                        <div className="flex items-center gap-4">
-                          <span className="text-xs text-gray-500 w-8">1</span>
-                          <input
-                            type="range"
-                            min="1"
-                            max="10"
-                            value={rating.value}
-                            onChange={(e) => updateTempRating(rating.id, Number(e.target.value))}
-                            className={`flex-1 h-2 rounded-lg appearance-none cursor-pointer ${
-                              rating.unrated ? 'bg-red-200 accent-red-600' : 'bg-gray-200 accent-blue-600'
-                            }`}
-                          />
-                          <span className="text-xs text-gray-500 w-8">10</span>
-                          <span className={`text-2xl font-bold w-12 text-center ${
-                            rating.unrated ? 'text-red-600' : 'text-blue-600'
-                          }`}>
-                            {rating.value}
-                          </span>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               ))}
