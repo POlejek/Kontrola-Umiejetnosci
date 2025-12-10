@@ -1859,6 +1859,9 @@ export default function PlayerManager() {
     }
   </style>
   <script>
+    // Zmienna do śledzenia czy już zainicjalizowano
+    let initialized = false;
+    
     function toggleNode(nodeId, event) {
       // Zapobiegaj propagacji eventu
       if (event) {
@@ -1869,71 +1872,140 @@ export default function PlayerManager() {
       const content = document.getElementById(nodeId);
       const icon = document.getElementById('icon-' + nodeId);
       
-      if (!content || !icon) return;
+      if (!content || !icon) {
+        console.log('Nie znaleziono elementów:', nodeId);
+        return;
+      }
       
-      if (content.style.display === 'none' || content.style.display === '') {
-        content.style.display = 'block';
+      const isHidden = content.style.display === 'none' || content.style.display === '';
+      content.style.display = isHidden ? 'block' : 'none';
+      
+      if (isHidden) {
         icon.classList.add('open');
       } else {
-        content.style.display = 'none';
         icon.classList.remove('open');
       }
     }
     
-    // Inicjalizacja po załadowaniu strony
-    document.addEventListener('DOMContentLoaded', function() {
-      // Dodaj obsługę touch events dla wszystkich nagłówków
-      const headers = document.querySelectorAll('.node-header');
-      headers.forEach(header => {
-        // Usuń inline onclick żeby nie było podwójnego wywołania
-        const onclickAttr = header.getAttribute('onclick');
-        if (onclickAttr) {
-          const nodeId = onclickAttr.match(/'([^']+)'/)[1];
-          header.removeAttribute('onclick');
-          
-          // Dodaj event listenery dla click i touch
-          header.addEventListener('click', function(e) {
-            toggleNode(nodeId, e);
-          });
-          
-          header.addEventListener('touchend', function(e) {
-            e.preventDefault();
-            toggleNode(nodeId, e);
-          });
-          
-          // Wizualna informacja zwrotna dla touch
-          header.addEventListener('touchstart', function() {
-            header.style.opacity = '0.7';
-          });
-          
-          header.addEventListener('touchend', function() {
-            setTimeout(() => {
-              header.style.opacity = '1';
-            }, 100);
-          });
-          
-          header.addEventListener('touchcancel', function() {
-            header.style.opacity = '1';
-          });
-        }
-      });
-    });
-    
     // Funkcja do rozwinięcia wszystkich sekcji
-    function expandAll() {
+    function expandAll(event) {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      
+      console.log('Rozwijam wszystko...');
       const allContents = document.querySelectorAll('.node-content');
       const allIcons = document.querySelectorAll('.toggle-icon');
-      allContents.forEach(content => content.style.display = 'block');
-      allIcons.forEach(icon => icon.classList.add('open'));
+      
+      console.log('Znaleziono elementów:', allContents.length);
+      
+      allContents.forEach(content => {
+        content.style.display = 'block';
+      });
+      
+      allIcons.forEach(icon => {
+        icon.classList.add('open');
+      });
     }
     
     // Funkcja do zwinięcia wszystkich sekcji
-    function collapseAll() {
+    function collapseAll(event) {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      
+      console.log('Zwijam wszystko...');
       const allContents = document.querySelectorAll('.node-content');
       const allIcons = document.querySelectorAll('.toggle-icon');
-      allContents.forEach(content => content.style.display = 'none');
-      allIcons.forEach(icon => icon.classList.remove('open'));
+      
+      allContents.forEach(content => {
+        content.style.display = 'none';
+      });
+      
+      allIcons.forEach(icon => {
+        icon.classList.remove('open');
+      });
     }
+    
+    // Funkcja inicjalizująca
+    function initializeReport() {
+      if (initialized) return;
+      initialized = true;
+      
+      console.log('Inicjalizacja raportu...');
+      
+      // Dodaj obsługę dla nagłówków węzłów
+      const headers = document.querySelectorAll('.node-header');
+      console.log('Znaleziono nagłówków:', headers.length);
+      
+      headers.forEach((header, index) => {
+        // Usuń inline onclick
+        const onclickAttr = header.getAttribute('onclick');
+        if (onclickAttr) {
+          const match = onclickAttr.match(/'([^']+)'/);
+          if (match) {
+            const nodeId = match[1];
+            header.removeAttribute('onclick');
+            
+            // Handler dla kliknięcia
+            const clickHandler = function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              toggleNode(nodeId, e);
+            };
+            
+            // Dodaj event listenery
+            header.addEventListener('click', clickHandler, { passive: false });
+            header.addEventListener('touchend', clickHandler, { passive: false });
+            
+            // Wizualna informacja zwrotna
+            header.addEventListener('touchstart', function(e) {
+              header.style.opacity = '0.7';
+            }, { passive: true });
+            
+            header.addEventListener('touchcancel', function() {
+              header.style.opacity = '1';
+            }, { passive: true });
+          }
+        }
+      });
+      
+      // Dodaj obsługę dla przycisków Rozwiń/Zwiń
+      const expandBtn = document.getElementById('expand-all-btn');
+      const collapseBtn = document.getElementById('collapse-all-btn');
+      
+      if (expandBtn) {
+        expandBtn.removeAttribute('onclick');
+        expandBtn.addEventListener('click', expandAll, { passive: false });
+        expandBtn.addEventListener('touchend', function(e) {
+          e.preventDefault();
+          expandAll(e);
+        }, { passive: false });
+      }
+      
+      if (collapseBtn) {
+        collapseBtn.removeAttribute('onclick');
+        collapseBtn.addEventListener('click', collapseAll, { passive: false });
+        collapseBtn.addEventListener('touchend', function(e) {
+          e.preventDefault();
+          collapseAll(e);
+        }, { passive: false });
+      }
+      
+      console.log('Inicjalizacja zakończona');
+    }
+    
+    // Inicjalizacja po załadowaniu
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeReport);
+    } else {
+      initializeReport();
+    }
+    
+    // Backup inicjalizacja po czasie
+    setTimeout(initializeReport, 500);
     
     // Funkcja do zapisu raportu jako HTML
     function saveReport() {
@@ -2021,10 +2093,10 @@ export default function PlayerManager() {
     <div class="content">
       <h2>🎯 Szczegółowa Hierarchia Umiejętności</h2>
       <div style="text-align: center; margin-bottom: 20px;">
-        <button onclick="expandAll()" style="padding: 10px 20px; margin: 0 5px; border: none; background: #10b981; color: white; border-radius: 8px; cursor: pointer; font-weight: 600;">
+        <button id="expand-all-btn" style="padding: 10px 20px; margin: 0 5px; border: none; background: #10b981; color: white; border-radius: 8px; cursor: pointer; font-weight: 600; touch-action: manipulation;">
           ▼ Rozwiń Wszystko
         </button>
-        <button onclick="collapseAll()" style="padding: 10px 20px; margin: 0 5px; border: none; background: #6b7280; color: white; border-radius: 8px; cursor: pointer; font-weight: 600;">
+        <button id="collapse-all-btn" style="padding: 10px 20px; margin: 0 5px; border: none; background: #6b7280; color: white; border-radius: 8px; cursor: pointer; font-weight: 600; touch-action: manipulation;">
           ▲ Zwiń Wszystko
         </button>
       </div>
