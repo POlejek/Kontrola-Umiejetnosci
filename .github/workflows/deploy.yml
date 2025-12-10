@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - v2.0-webserv
   workflow_dispatch:
 
 permissions:
