@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - v2.0-webserv
+      # v3.0-server ma osobny workflow - nie używa GitHub Pages
   workflow_dispatch:
 
 permissions:

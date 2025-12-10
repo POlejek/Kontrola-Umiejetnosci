@@ -1,0 +1,48 @@
+name: Build and Test Server Version
+
+on:
+  push:
+    branches:
+      - v3.0-server
+  pull_request:
+    branches:
+      - v3.0-server
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Test build
+        run: |
+          echo "✅ Frontend build successful"
+          ls -la dist/
+          
+      # W przyszłości: deploy do własnego serwera
+      # - name: Deploy to VPS
+      #   run: |
+      #     echo "Deploy to custom server"
+      #     # Tutaj dodasz deployment do swojego serwera (SCP, FTP, Docker, etc.)
+
+      - name: Create build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: server-build
+          path: dist/
+          retention-days: 7
