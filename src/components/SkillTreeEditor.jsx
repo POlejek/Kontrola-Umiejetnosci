@@ -261,7 +261,11 @@ const SkillTreeEditor = ({ skillTree, onSave }) => {
           const fixedStructure = ensureUniqueIds(structureCopy);
           
           setEditedTree(fixedStructure);
-          alert('Struktura została zaimportowana i naprawiona! Kliknij "Zapisz zmiany" aby zastosować.');
+          
+          // Automatyczny zapis po imporcie
+          onSave(fixedStructure);
+          
+          alert('Struktura została zaimportowana i automatycznie zapisana!');
         }
       } catch (error) {
         alert('Błąd podczas importu: ' + error.message);

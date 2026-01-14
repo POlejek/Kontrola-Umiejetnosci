@@ -1606,9 +1606,15 @@ export default function PlayerManager() {
       align-items: center;
       transition: all 0.2s;
       user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      min-height: 50px;
     }
     .node-header:hover {
       background: #f8f9fa;
+    }
+    .node-header:active {
+      transform: scale(0.98);
     }
     .hierarchy-node.section .node-header {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -1786,6 +1792,158 @@ export default function PlayerManager() {
       color: white;
     }
     
+    /* Responsywność dla urządzeń mobilnych */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+      .report-container {
+        border-radius: 10px;
+      }
+      .header {
+        padding: 20px;
+      }
+      .header h1 {
+        font-size: 1.5em;
+      }
+      .header p {
+        font-size: 0.9em;
+      }
+      .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        padding: 20px;
+      }
+      .stat-card {
+        padding: 20px;
+      }
+      .stat-card .value {
+        font-size: 2.5em;
+      }
+      .radar-section {
+        padding: 20px;
+      }
+      .radar-section h2 {
+        font-size: 1.3em;
+      }
+      .radar-section canvas {
+        max-width: 100%;
+        height: auto !important;
+      }
+      .content {
+        padding: 20px;
+      }
+      .content h2 {
+        font-size: 1.3em;
+        margin-bottom: 20px;
+      }
+      .node-header {
+        padding: 15px;
+        flex-wrap: wrap;
+        min-height: 60px;
+      }
+      .hierarchy-node.section .node-header {
+        padding: 18px 15px;
+        min-height: 65px;
+      }
+      .hierarchy-node.subsection .node-header {
+        padding: 15px;
+        min-height: 60px;
+      }
+      .hierarchy-node.subsubsection .node-header {
+        padding: 12px 15px;
+        min-height: 55px;
+      }
+      .node-title-row {
+        font-size: 1em;
+        gap: 8px;
+      }
+      .hierarchy-node.subsection .node-title-row {
+        font-size: 0.95em;
+      }
+      .hierarchy-node.subsubsection .node-title-row {
+        font-size: 0.9em;
+      }
+      .node-averages {
+        gap: 8px;
+        margin-top: 8px;
+        width: 100%;
+        justify-content: flex-start;
+      }
+      .node-avg {
+        min-width: 40px;
+        padding: 4px 10px;
+        font-size: 0.9em;
+      }
+      .node-content {
+        padding: 15px;
+      }
+      .skill-row {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 12px 15px;
+        gap: 10px;
+      }
+      .skill-name {
+        font-size: 0.95em;
+      }
+      .skill-ratings {
+        gap: 10px;
+        width: 100%;
+        justify-content: space-around;
+      }
+      .skill-rating {
+        min-width: auto;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.8em;
+      }
+      .rating {
+        min-width: 35px;
+        padding: 4px 8px;
+        font-size: 0.9em;
+      }
+      .footer {
+        padding: 20px;
+      }
+      .action-buttons {
+        position: static;
+        padding: 15px;
+        justify-content: center;
+        background: white;
+        border-bottom: 2px solid #e5e7eb;
+      }
+      .action-btn {
+        padding: 10px 16px;
+        font-size: 0.85em;
+        flex: 1;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header h1 {
+        font-size: 1.3em;
+      }
+      .stat-card .value {
+        font-size: 2em;
+      }
+      .legend {
+        gap: 15px;
+      }
+      .legend-item {
+        font-size: 0.85em;
+      }
+      .node-title-row {
+        font-size: 0.9em;
+      }
+      .skill-ratings {
+        flex-wrap: wrap;
+      }
+    }
+    
     @media print {
       body { background: white; padding: 0; }
       .report-container { box-shadow: none; }
@@ -1796,34 +1954,102 @@ export default function PlayerManager() {
     }
   </style>
   <script>
-    function toggleNode(nodeId) {
+    // Funkcja do przełączania widoczności węzła
+    function toggleNode(nodeId, event) {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      
       const content = document.getElementById(nodeId);
       const icon = document.getElementById('icon-' + nodeId);
       
-      if (content.style.display === 'none' || content.style.display === '') {
-        content.style.display = 'block';
+      if (!content || !icon) return;
+      
+      const isHidden = content.style.display === 'none' || content.style.display === '';
+      content.style.display = isHidden ? 'block' : 'none';
+      
+      if (isHidden) {
         icon.classList.add('open');
       } else {
-        content.style.display = 'none';
         icon.classList.remove('open');
       }
     }
     
     // Funkcja do rozwinięcia wszystkich sekcji
-    function expandAll() {
+    function expandAll(event) {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      
       const allContents = document.querySelectorAll('.node-content');
       const allIcons = document.querySelectorAll('.toggle-icon');
-      allContents.forEach(content => content.style.display = 'block');
-      allIcons.forEach(icon => icon.classList.add('open'));
+      
+      allContents.forEach(content => {
+        content.style.display = 'block';
+      });
+      
+      allIcons.forEach(icon => {
+        icon.classList.add('open');
+      });
     }
     
     // Funkcja do zwinięcia wszystkich sekcji
-    function collapseAll() {
+    function collapseAll(event) {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      
       const allContents = document.querySelectorAll('.node-content');
       const allIcons = document.querySelectorAll('.toggle-icon');
-      allContents.forEach(content => content.style.display = 'none');
-      allIcons.forEach(icon => icon.classList.remove('open'));
+      
+      allContents.forEach(content => {
+        content.style.display = 'none';
+      });
+      
+      allIcons.forEach(icon => {
+        icon.classList.remove('open');
+      });
     }
+    
+    // Inicjalizacja eventów dla przycisków Rozwiń/Zwiń
+    function attachButtonHandlers() {
+      const expandBtn = document.getElementById('expand-all-btn');
+      const collapseBtn = document.getElementById('collapse-all-btn');
+      
+      if (expandBtn) {
+        expandBtn.onclick = function(e) {
+          e.preventDefault();
+          expandAll(e);
+          return false;
+        };
+      }
+      
+      if (collapseBtn) {
+        collapseBtn.onclick = function(e) {
+          e.preventDefault();
+          collapseAll(e);
+          return false;
+        };
+      }
+    }
+    
+    // Inicjalizacja po załadowaniu
+    function initializeReport() {
+      attachButtonHandlers();
+    }
+    
+    // Upewnij się że HTML jest załadowany
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeReport);
+    } else {
+      initializeReport();
+    }
+    
+    // Backup inicjalizacja
+    window.addEventListener('load', initializeReport);
     
     // Funkcja do zapisu raportu jako HTML
     function saveReport() {
@@ -1911,10 +2137,10 @@ export default function PlayerManager() {
     <div class="content">
       <h2>🎯 Szczegółowa Hierarchia Umiejętności</h2>
       <div style="text-align: center; margin-bottom: 20px;">
-        <button onclick="expandAll()" style="padding: 10px 20px; margin: 0 5px; border: none; background: #10b981; color: white; border-radius: 8px; cursor: pointer; font-weight: 600;">
+        <button id="expand-all-btn" style="padding: 10px 20px; margin: 0 5px; border: none; background: #10b981; color: white; border-radius: 8px; cursor: pointer; font-weight: 600; touch-action: manipulation;">
           ▼ Rozwiń Wszystko
         </button>
-        <button onclick="collapseAll()" style="padding: 10px 20px; margin: 0 5px; border: none; background: #6b7280; color: white; border-radius: 8px; cursor: pointer; font-weight: 600;">
+        <button id="collapse-all-btn" style="padding: 10px 20px; margin: 0 5px; border: none; background: #6b7280; color: white; border-radius: 8px; cursor: pointer; font-weight: 600; touch-action: manipulation;">
           ▲ Zwiń Wszystko
         </button>
       </div>

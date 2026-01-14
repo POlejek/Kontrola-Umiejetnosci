@@ -339,15 +339,25 @@ export default function SkillWheelDiagram({
       return;
     }
     
-    // DEBUG: Sprawdź czy są duplikaty ID
+    // DEBUG: Sprawdź czy są duplikaty ID i strukturę pytań
     const ids = allQuestions.map(q => q.id);
     const uniqueIds = new Set(ids);
+    
+    console.log('📋 ZBRANE PYTANIA:', {
+      wszystkich: ids.length,
+      unikalnych: uniqueIds.size,
+      pytania: allQuestions.map(q => ({ 
+        id: q.id, 
+        name: q.name, 
+        section: q.section 
+      }))
+    });
+    
     if (ids.length !== uniqueIds.size) {
-      console.warn('⚠️ WYKRYTO DUPLIKATY ID W PYTANIACH!', {
-        wszystkich: ids.length,
-        unikalnych: uniqueIds.size,
-        pytania: allQuestions.map(q => ({ id: q.id, name: q.name }))
-      });
+      console.warn('⚠️ WYKRYTO DUPLIKATY ID W PYTANIACH!');
+      // Znajdź które ID się powtarzają
+      const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index);
+      console.warn('Duplikaty:', duplicates);
     }
     
     setSurveyType(type);
@@ -374,11 +384,20 @@ export default function SkillWheelDiagram({
   };
 
   const updateTempRating = (questionId, value) => {
-    setTempRatings(prevRatings => 
-      prevRatings.map(r => 
+    console.log(`🎯 Zmiana oceny:`, {
+      questionId,
+      value,
+      poprzednieStan: tempRatings.find(r => r.id === questionId)
+    });
+    
+    setTempRatings(prevRatings => {
+      const updated = prevRatings.map(r => 
         r.id === questionId ? { ...r, value, unrated: false } : r
-      )
-    );
+      );
+      
+      console.log(`✅ Nowy stan po zmianie:`, updated.find(r => r.id === questionId));
+      return updated;
+    });
   };
 
   const submitSurvey = (callback) => {
