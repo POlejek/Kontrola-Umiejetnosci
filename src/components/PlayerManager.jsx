@@ -1859,11 +1859,8 @@ export default function PlayerManager() {
     }
   </style>
   <script>
-    // Zmienna do śledzenia czy już zainicjalizowano
-    let initialized = false;
-    
+    // Funkcja do przełączania widoczności węzła
     function toggleNode(nodeId, event) {
-      // Zapobiegaj propagacji eventu
       if (event) {
         event.preventDefault();
         event.stopPropagation();
@@ -1872,10 +1869,7 @@ export default function PlayerManager() {
       const content = document.getElementById(nodeId);
       const icon = document.getElementById('icon-' + nodeId);
       
-      if (!content || !icon) {
-        console.log('Nie znaleziono elementów:', nodeId);
-        return;
-      }
+      if (!content || !icon) return;
       
       const isHidden = content.style.display === 'none' || content.style.display === '';
       content.style.display = isHidden ? 'block' : 'none';
@@ -1894,11 +1888,8 @@ export default function PlayerManager() {
         event.stopPropagation();
       }
       
-      console.log('Rozwijam wszystko...');
       const allContents = document.querySelectorAll('.node-content');
       const allIcons = document.querySelectorAll('.toggle-icon');
-      
-      console.log('Znaleziono elementów:', allContents.length);
       
       allContents.forEach(content => {
         content.style.display = 'block';
@@ -1916,7 +1907,6 @@ export default function PlayerManager() {
         event.stopPropagation();
       }
       
-      console.log('Zwijam wszystko...');
       const allContents = document.querySelectorAll('.node-content');
       const allIcons = document.querySelectorAll('.toggle-icon');
       
@@ -1929,83 +1919,42 @@ export default function PlayerManager() {
       });
     }
     
-    // Funkcja inicjalizująca
-    function initializeReport() {
-      if (initialized) return;
-      initialized = true;
-      
-      console.log('Inicjalizacja raportu...');
-      
-      // Dodaj obsługę dla nagłówków węzłów
-      const headers = document.querySelectorAll('.node-header');
-      console.log('Znaleziono nagłówków:', headers.length);
-      
-      headers.forEach((header, index) => {
-        // Usuń inline onclick
-        const onclickAttr = header.getAttribute('onclick');
-        if (onclickAttr) {
-          const match = onclickAttr.match(/'([^']+)'/);
-          if (match) {
-            const nodeId = match[1];
-            header.removeAttribute('onclick');
-            
-            // Handler dla kliknięcia
-            const clickHandler = function(e) {
-              e.preventDefault();
-              e.stopPropagation();
-              toggleNode(nodeId, e);
-            };
-            
-            // Dodaj event listenery
-            header.addEventListener('click', clickHandler, { passive: false });
-            header.addEventListener('touchend', clickHandler, { passive: false });
-            
-            // Wizualna informacja zwrotna
-            header.addEventListener('touchstart', function(e) {
-              header.style.opacity = '0.7';
-            }, { passive: true });
-            
-            header.addEventListener('touchcancel', function() {
-              header.style.opacity = '1';
-            }, { passive: true });
-          }
-        }
-      });
-      
-      // Dodaj obsługę dla przycisków Rozwiń/Zwiń
+    // Inicjalizacja eventów dla przycisków Rozwiń/Zwiń
+    function attachButtonHandlers() {
       const expandBtn = document.getElementById('expand-all-btn');
       const collapseBtn = document.getElementById('collapse-all-btn');
       
       if (expandBtn) {
-        expandBtn.removeAttribute('onclick');
-        expandBtn.addEventListener('click', expandAll, { passive: false });
-        expandBtn.addEventListener('touchend', function(e) {
+        expandBtn.onclick = function(e) {
           e.preventDefault();
           expandAll(e);
-        }, { passive: false });
+          return false;
+        };
       }
       
       if (collapseBtn) {
-        collapseBtn.removeAttribute('onclick');
-        collapseBtn.addEventListener('click', collapseAll, { passive: false });
-        collapseBtn.addEventListener('touchend', function(e) {
+        collapseBtn.onclick = function(e) {
           e.preventDefault();
           collapseAll(e);
-        }, { passive: false });
+          return false;
+        };
       }
-      
-      console.log('Inicjalizacja zakończona');
     }
     
     // Inicjalizacja po załadowaniu
+    function initializeReport() {
+      attachButtonHandlers();
+    }
+    
+    // Upewnij się że HTML jest załadowany
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', initializeReport);
     } else {
       initializeReport();
     }
     
-    // Backup inicjalizacja po czasie
-    setTimeout(initializeReport, 500);
+    // Backup inicjalizacja
+    window.addEventListener('load', initializeReport);
     
     // Funkcja do zapisu raportu jako HTML
     function saveReport() {
